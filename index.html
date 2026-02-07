@@ -581,11 +581,14 @@
         // Improved CSV parser that handles quoted fields properly
         function parseCSV(csv) {
             const lines = csv.trim().split('\n');
-            if (lines.length < 2) return [];
+            if (lines.length < 2) {
+                console.error('CSV has less than 2 lines');
+                return [];
+            }
             
             // Parse header row
             const headers = parseCSVLine(lines[0]);
-            console.log('Headers found:', headers);
+            console.log('Headers found:', headers.length, headers);
             
             // Parse data rows
             const data = [];
@@ -601,10 +604,16 @@
                     row[header] = values[index] || '';
                 });
                 
-                // Only include rows that have at least a first or last name
-                if (row['First Name'] || row['Last Name']) {
+                // Check if row has meaningful data (not all empty)
+                const hasData = Object.values(row).some(val => val && val.trim());
+                if (hasData) {
                     data.push(row);
                 }
+            }
+            
+            console.log('Parsed contacts:', data.length);
+            if (data.length > 0) {
+                console.log('First contact:', data[0]);
             }
             
             return data;
