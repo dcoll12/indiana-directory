@@ -368,7 +368,7 @@
 
         .list-header {
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr 150px;
+            grid-template-columns: 2fr 1fr 1.5fr 1fr 200px;
             gap: 20px;
             padding: 15px 20px;
             background: #f8fafc;
@@ -390,7 +390,7 @@
             padding: 20px;
             margin-bottom: 15px;
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr 150px;
+            grid-template-columns: 2fr 1fr 1.5fr 1fr 200px;
             gap: 20px;
             align-items: center;
             transition: all 0.2s;
@@ -2332,6 +2332,19 @@
             const email = contact.Email || '';
             const phone = contact.Phone || '';
             
+            // Collect all districts
+            const districts = [];
+            if (contact.District) districts.push(contact.District);
+            if (contact['Congressional District']) districts.push(contact['Congressional District']);
+            if (contact['House District']) districts.push(contact['House District']);
+            if (contact['Senate District']) districts.push(contact['Senate District']);
+            const districtText = districts.length > 0 ? districts.join(', ') : '—';
+            
+            // Check for social media
+            const hasWebsite = contact.Website && contact.Website !== '?' && contact.Website.startsWith('http');
+            const hasFacebook = contact.Facebook && contact.Facebook !== '?' && contact.Facebook !== 'No Campaign page?' && contact.Facebook.startsWith('http');
+            const hasInstagram = contact.Instagram && contact.Instagram !== '?' && contact.Instagram !== '';
+            
             return `
                 <div class="list-item">
                     <div>
@@ -2342,14 +2355,17 @@
                         ${contact['Home City'] ? contact['Home City'] + (contact['Home County'] ? ', ' + contact['Home County'] : '') : '—'}
                     </div>
                     <div class="list-district">
-                        ${contact.District || '—'}
+                        ${districtText}
                     </div>
                     <div class="list-location">
                         ${contact.Occupation || '—'}
                     </div>
                     <div class="list-actions">
-                        ${email ? `<a href="mailto:${email}">📧</a>` : ''}
-                        ${phone ? `<a href="tel:${phone}">📞</a>` : ''}
+                        ${email ? `<a href="mailto:${email}" title="Email">📧</a>` : ''}
+                        ${phone ? `<a href="tel:${phone}" title="Call">📞</a>` : ''}
+                        ${hasWebsite ? `<a href="${contact.Website}" target="_blank" title="Website">🌐</a>` : ''}
+                        ${hasFacebook ? `<a href="${contact.Facebook}" target="_blank" title="Facebook">📘</a>` : ''}
+                        ${hasInstagram ? `<a href="https://instagram.com/${contact.Instagram.replace('@', '')}" target="_blank" title="Instagram">📸</a>` : ''}
                     </div>
                 </div>
             `;
