@@ -330,6 +330,115 @@
             transform: translateY(-2px);
         }
 
+        .view-toggle {
+            display: flex;
+            gap: 5px;
+        }
+
+        .view-btn {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 8px 16px;
+            background: white;
+            color: #64748b;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .view-btn:hover {
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+
+        .view-btn.active {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+
+        /* List View Styles */
+        .directory-list {
+            padding: 0 40px 40px 40px;
+        }
+
+        .list-item {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 150px;
+            gap: 20px;
+            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .list-item:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .list-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .list-role {
+            color: #3b82f6;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .list-location {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .list-district {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .list-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+
+        .list-actions a {
+            padding: 6px 12px;
+            background: #eff6ff;
+            color: #1e40af;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .list-actions a:hover {
+            background: #3b82f6;
+            color: white;
+        }
+
+        @media (max-width: 1200px) {
+            .list-item {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .list-actions {
+                justify-content: flex-start;
+            }
+        }
+
         /* Modal styles */
         .modal {
             display: none;
@@ -496,11 +605,28 @@
         </div>
 
         <div class="stats">
-            <div class="stats-item">
-                Total Contacts: <span id="totalCount">0</span>
+            <div>
+                <span class="stats-item">Total Contacts: <span id="totalCount">0</span></span>
+                <span class="stats-item" style="margin-left: 20px;">Showing: <span id="visibleCount">0</span></span>
             </div>
-            <div class="stats-item">
-                Showing: <span id="visibleCount">0</span>
+            <div class="view-toggle">
+                <button class="view-btn active" id="gridViewBtn" onclick="switchView('grid')">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <rect x="1" y="1" width="6" height="6" rx="1"/>
+                        <rect x="9" y="1" width="6" height="6" rx="1"/>
+                        <rect x="1" y="9" width="6" height="6" rx="1"/>
+                        <rect x="9" y="9" width="6" height="6" rx="1"/>
+                    </svg>
+                    Grid
+                </button>
+                <button class="view-btn" id="listViewBtn" onclick="switchView('list')">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <rect x="1" y="2" width="14" height="2" rx="1"/>
+                        <rect x="1" y="7" width="14" height="2" rx="1"/>
+                        <rect x="1" y="12" width="14" height="2" rx="1"/>
+                    </svg>
+                    List
+                </button>
             </div>
         </div>
 
@@ -659,7 +785,1322 @@
             return result;
         }
 
-     
+        // Original embedded data as fallback
+        const fallbackData = [
+  {
+    "First Name": "Reece",
+    "Last Name": "Adams",
+    "Role": "Former candidate",
+    "Title": "House",
+    "District": "HD 53",
+    "Counties": "",
+    "Email": "reece4indiana@gmail.com",
+    "Phone": "",
+    "Website": "https://www.reece453.org",
+    "Facebook": "https://www.facebook.com/profile.php?id=61578789937531",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Chloe",
+    "Last Name": "Andis",
+    "Role": "Candidate",
+    "Title": "Senate",
+    "District": "SD 15",
+    "Counties": "Allen",
+    "Email": "chloe@chloeforhoosiers.com",
+    "Phone": 2604105925,
+    "Website": "https://www.chloeforhoosiers.com",
+    "Facebook": "https://www.facebook.com/chloeforhoosiers",
+    "Instagram": "",
+    "Home City": "Fort Wayne",
+    "Home County": "Allen",
+    "Occupation": "Electrical Manufacturing"
+  },
+  {
+    "First Name": "Sam",
+    "Last Name": "Armstrong",
+    "Role": "Volunteer - IRS",
+    "Title": "Data Manager",
+    "District": "",
+    "Counties": "",
+    "Email": "Armstrong9692@gmail.com",
+    "Phone": "",
+    "Website": "",
+    "Facebook": "",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Natasha",
+    "Last Name": "Baker",
+    "Role": "Candidate",
+    "Title": "Senate",
+    "District": "SD 22",
+    "Counties": "Carroll, Tippecanoe",
+    "Email": "natashabaker@electnatashabaker.org",
+    "Phone": 7654093806,
+    "Website": "http://electnatashabaker.org/",
+    "Facebook": "https://www.facebook.com/profile.php?id=61581908942480",
+    "Instagram": "",
+    "Home City": "Battle Ground",
+    "Home County": "Tippecanoe",
+    "Occupation": "Family and Consumer Sciences Teacher"
+  },
+  {
+    "First Name": "John E.",
+    "Last Name": "Bartlett",
+    "Role": "Candidate, Steering Committee",
+    "Title": "House",
+    "District": "HD 33",
+    "Counties": "Blackford, Delaware, Randolph, Henry, Jay",
+    "Email": "BartlettForIN@gmail.com",
+    "Phone": "317-695-4862",
+    "Website": "https://www.bartlettforindiana.org",
+    "Facebook": "https://www.facebook.com/BartlettForIN",
+    "Instagram": "",
+    "Home City": "Hartford City",
+    "Home County": "Blackford",
+    "Occupation": "IT Field Service Technician"
+  },
+  {
+    "First Name": "Kye ",
+    "Last Name": "Benford",
+    "Role": "Volunteer - IRS",
+    "Title": "College Dems",
+    "District": "",
+    "Counties": "",
+    "Email": "kyebenford@gmail.com",
+    "Phone": "",
+    "Website": "",
+    "Facebook": "",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Bob ",
+    "Last Name": "Bernacki",
+    "Role": "Other",
+    "Title": "Data Advisor",
+    "District": "",
+    "Counties": "",
+    "Email": "bhb@bernacki.com",
+    "Phone": "",
+    "Website": "",
+    "Facebook": "",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Dana ",
+    "Last Name": "Black",
+    "Role": "Other",
+    "Title": "Content Creator",
+    "District": "",
+    "Counties": "",
+    "Email": "dana@indianasown.com",
+    "Phone": "",
+    "Website": "",
+    "Facebook": "",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Racheal",
+    "Last Name": "Bleicher",
+    "Role": "Candidate",
+    "Title": "House",
+    "District": "HD 24",
+    "Counties": "Boone",
+    "Email": "bleicher.racheal@gmail.com",
+    "Phone": 6189806991,
+    "Website": "https://www.rachealforindiana.com",
+    "Facebook": "https://www.facebook.com/RachealforIndiana",
+    "Instagram": "",
+    "Home City": "Westfield",
+    "Home County": "Hamilton",
+    "Occupation": "Sales Manager"
+  },
+  {
+    "First Name": "Sarah",
+    "Last Name": "Blessing",
+    "Role": "Candidate",
+    "Title": "House",
+    "District": "HD 70",
+    "Counties": "Clark, Harrison, Washington",
+    "Email": "sarahjblessing@gmail.com",
+    "Phone": 8127862276,
+    "Website": "",
+    "Facebook": "https://www.facebook.com/sarah.summers.526",
+    "Instagram": "",
+    "Home City": "Palmyra",
+    "Home County": "Harrison",
+    "Occupation": "Cofounder of Project Next and former teacher"
+  },
+  {
+    "First Name": "Jenni ",
+    "Last Name": "Bohn",
+    "Role": "Other",
+    "Title": "",
+    "District": "",
+    "Counties": "",
+    "Email": "jennibohn@gmail.com",
+    "Phone": "",
+    "Website": "",
+    "Facebook": "",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Chris",
+    "Last Name": "Bowen",
+    "Role": "Candidate",
+    "Title": "House",
+    "District": "HD 69",
+    "Counties": "Bartholomew, Jackson, Scott, Washington",
+    "Email": "chrisbowen1999@gmail.com",
+    "Phone": "",
+    "Website": "https://www.chrisbowen.org",
+    "Facebook": "https://www.facebook.com/profile.php?id=61585831214170",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Sally",
+    "Last Name": "Busby",
+    "Role": "Candidate",
+    "Title": "House",
+    "District": "HD 78",
+    "Counties": "Vanderburgh",
+    "Email": "sallymonroebusby@gmail.com",
+    "Phone": "",
+    "Website": "https://www.sallyforindiana.com",
+    "Facebook": "https://www.facebook.com/profile.php?id=61575716350308",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Isaac ",
+    "Last Name": "Chapman-Whitehead ",
+    "Role": "Volunteer - IRS, Steering Committee",
+    "Title": "College / Youth Liaison",
+    "District": "",
+    "Counties": "Perry",
+    "Email": "braddockscott7@gmail.com",
+    "Phone": 8124532092,
+    "Website": "",
+    "Facebook": "https://www.facebook.com/profile.php?id=61564677239382",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Cindi",
+    "Last Name": "Clayton",
+    "Role": "Candidate",
+    "Title": "Senate",
+    "District": "SD 49",
+    "Counties": "Posey, Vanderburgh",
+    "Email": "cindiforsenate@gmail.com",
+    "Phone": 8125759329,
+    "Website": "https://www.cindiforsenate.com",
+    "Facebook": "https://www.facebook.com/cindi.claytonschnitker",
+    "Instagram": "",
+    "Home City": "Evansville",
+    "Home County": "Vanderburgh",
+    "Occupation": "Advanced Instructor in Business Communication, University of Southern Indiana"
+  },
+  {
+    "First Name": "Darian",
+    "Last Name": "Collier",
+    "Role": "Steering Committee, Volunteer - IRS",
+    "Title": "Data Manager",
+    "District": "HD 69",
+    "Counties": "Jackson",
+    "Email": "DarianRoark18@gmail.com",
+    "Phone": 8125215712,
+    "Website": "",
+    "Facebook": "https://www.facebook.com/dariancollier2/",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": "Communtiy & Grants Analyst"
+  },
+  {
+    "First Name": "Hunter",
+    "Last Name": "Collins",
+    "Role": "Candidate",
+    "Title": "House",
+    "District": "HD 68",
+    "Counties": "Dearborn, Jefferson, Ohio, Switzerland",
+    "Email": "hunterforindiana@gmail.com",
+    "Phone": 8593916675,
+    "Website": "https://huntercollins.org",
+    "Facebook": "https://www.facebook.com/hunter.collins.902",
+    "Instagram": "",
+    "Home City": "Aurora",
+    "Home County": "Dearborn",
+    "Occupation": "Warehouse Worker and Labor Organizer"
+  },
+  {
+    "First Name": "Will",
+    "Last Name": "Colteryahn",
+    "Role": "Candidate",
+    "Title": "House",
+    "District": "HD 40",
+    "Counties": "Hendricks",
+    "Email": "wcolteryahn@yahoo.com",
+    "Phone": 7246308400,
+    "Website": "http://www.willcolteryahn.com",
+    "Facebook": "No Campaign page?",
+    "Instagram": "",
+    "Home City": "Avon",
+    "Home County": "Hendricks",
+    "Occupation": "Social Worker and State Government Employee"
+  },
+  {
+    "First Name": "Emma",
+    "Last Name": "Crossen",
+    "Role": "Other",
+    "Title": "Multi-faith alliance",
+    "District": "SD40, HD62",
+    "Counties": "Monroe County ",
+    "Email": "emma.crossen@gmail.com",
+    "Phone": "",
+    "Website": "",
+    "Facebook": "?",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Kurtis ",
+    "Last Name": "Cummings",
+    "Role": "Candidate",
+    "Title": "House",
+    "District": "HD 48",
+    "Counties": "Madison",
+    "Email": "admin@kurtisforindiana.com",
+    "Phone": 3175734145,
+    "Website": "https://www.kurtisforindiana.com",
+    "Facebook": "https://www.facebook.com/kurtisforindiana",
+    "Instagram": "",
+    "Home City": "Anderson",
+    "Home County": "Madison",
+    "Occupation": "Musician"
+  },
+  {
+    "First Name": "John",
+    "Last Name": "Denniston",
+    "Role": "Volunteer - IRS",
+    "Title": "Veteran Liaison",
+    "District": "Statewide",
+    "Counties": "",
+    "Email": "denniston_john@yahoo.com",
+    "Phone": "",
+    "Website": "",
+    "Facebook": "?",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Rick ",
+    "Last Name": "Denning",
+    "Role": "Candidate",
+    "Title": "House",
+    "District": "HD 60",
+    "Counties": "Monroe, Morgan, Johnson",
+    "Email": "vote@electrickdenning.com",
+    "Phone": 3178089400,
+    "Website": "https://www.electrickdenning.com",
+    "Facebook": "https://www.facebook.com/DenningforIndiana",
+    "Instagram": "",
+    "Home City": "Martinsville",
+    "Home County": "Morgan",
+    "Occupation": "Attorney and Former Prosecutor"
+  },
+  {
+    "First Name": "Brian ",
+    "Last Name": "Dorman",
+    "Role": "Other",
+    "Title": "Communications",
+    "District": "",
+    "Counties": "Wells",
+    "Email": "brian@inhousecreative.net",
+    "Phone": 2604503950,
+    "Website": "",
+    "Facebook": "",
+    "Instagram": "",
+    "Home City": "Bluffton",
+    "Home County": "Wells",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Ryan",
+    "Last Name": "Dvorak",
+    "Role": "Candidate",
+    "Title": "House",
+    "District": "HD 41",
+    "Counties": "Hendricks",
+    "Email": "ryan@dvorakforus.com",
+    "Phone": "",
+    "Website": "https://www.dvorakforus.com",
+    "Facebook": "https://www.facebook.com/dvorak4us",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Justin ",
+    "Last Name": "Fleming",
+    "Role": "Candidate",
+    "Title": "House",
+    "District": "HD 50",
+    "Counties": "Grant",
+    "Email": "justinfleming4staterep@gmail.com",
+    "Phone": 7653932035,
+    "Website": "",
+    "Facebook": "https://www.facebook.com/profile.php?id=61572165683332",
+    "Instagram": "",
+    "Home City": "Marion",
+    "Home County": "Grant",
+    "Occupation": "Manufacturing"
+  },
+  {
+    "First Name": "Jason ",
+    "Last Name": "Frazier",
+    "Role": "Other",
+    "Title": "",
+    "District": "",
+    "Counties": "",
+    "Email": "jason.d.frazier@gmail.com",
+    "Phone": "",
+    "Website": "",
+    "Facebook": "",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Jessica ",
+    "Last Name": "Frazier",
+    "Role": "Other",
+    "Title": "",
+    "District": "",
+    "Counties": "",
+    "Email": "Frazierjessy@gmail.com",
+    "Phone": "",
+    "Website": "",
+    "Facebook": "",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Rob ",
+    "Last Name": "Fulgenzi",
+    "Role": "Candidate",
+    "Title": "House",
+    "District": "HD 71",
+    "Counties": "Floyd",
+    "Email": "rob@votedifferenthoosiers.com",
+    "Phone": "",
+    "Website": "https://www.votedifferenthoosiers.com",
+    "Facebook": "https://www.facebook.com/votedifferenthoosiers",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Jenny ",
+    "Last Name": "Gammon ",
+    "Role": "Candidate, Advisory Committee, Former candidate",
+    "Title": "House; Co. Chair",
+    "District": "HD 54",
+    "Counties": "Hancock, Shelby, Rush, Marion, Johnson",
+    "Email": "gammon.jenny@gmail.com",
+    "Phone": "",
+    "Website": "",
+    "Facebook": "https://www.facebook.com/jenny.gammon.756",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Kathy",
+    "Last Name": "Goecker",
+    "Role": "Volunteer - IRS",
+    "Title": "Rural Liaison",
+    "District": "Statewide",
+    "Counties": "",
+    "Email": "kathygoecker13@gmail.com",
+    "Phone": 5748506116,
+    "Website": "",
+    "Facebook": "",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Josh ",
+    "Last Name": "Hain",
+    "Role": "Candidate",
+    "Title": "House",
+    "District": "HD 67",
+    "Counties": "Jackson, Lawrence, Washington",
+    "Email": "josh.a.hain@gmail.com",
+    "Phone": 8126508887,
+    "Website": "https://www.joshforindiana.com",
+    "Facebook": "https://www.facebook.com/profile.php?id=61558768076819",
+    "Instagram": "@joshfoindiana",
+    "Home City": "Bedford",
+    "Home County": "Lawrence",
+    "Occupation": "Healthcare Administrator"
+  },
+  {
+    "First Name": "Donna ",
+    "Last Name": "Harmon",
+    "Role": "Candidate, Advisory Committee",
+    "Title": "House; Cochair Organizing",
+    "District": "HD 98",
+    "Counties": "Hancock",
+    "Email": "donna.harmon@sbcglobal.net",
+    "Phone": 3178919363,
+    "Website": "",
+    "Facebook": "https://www.facebook.com/donna.harmon.5686",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Erin",
+    "Last Name": "Houchin",
+    "Role": "Former candidate, Advisory Committee",
+    "Title": "Senate",
+    "District": "SD 42",
+    "Counties": "Washington",
+    "Email": "erinhouchin@gmail.com",
+    "Phone": "",
+    "Website": "",
+    "Facebook": "https://www.facebook.com/erin.m.houchin",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Molly",
+    "Last Name": "Hughes",
+    "Role": "Volunteer - IRS",
+    "Title": "Events",
+    "District": "",
+    "Counties": "",
+    "Email": "mollyhughes7@hotmail.com",
+    "Phone": "",
+    "Website": "",
+    "Facebook": "",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Nikki ",
+    "Last Name": "Jensen",
+    "Role": "Candidate",
+    "Title": "House",
+    "District": "HD 61",
+    "Counties": "Marion",
+    "Email": "nikki@nikkijensen.org",
+    "Phone": "",
+    "Website": "https://www.nikkijensen.org",
+    "Facebook": "https://www.facebook.com/nikkijensenindy",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Curt ",
+    "Last Name": "Klein",
+    "Role": "Candidate, Advisory Committee",
+    "Title": "Local",
+    "District": "",
+    "Counties": "LaGrange County",
+    "Email": "curtklein@gmail.com",
+    "Phone": 2604992029,
+    "Website": "",
+    "Facebook": "",
+    "Instagram": "",
+    "Home City": "Shipshewana",
+    "Home County": "LaGrange County",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Kevin",
+    "Last Name": "Koble",
+    "Role": "Other",
+    "Title": "Policy Advisor",
+    "District": "",
+    "Counties": "",
+    "Email": "kevinkoble@gmail.com",
+    "Phone": "",
+    "Website": "",
+    "Facebook": "",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Andi ",
+    "Last Name": "Ladewig",
+    "Role": "Volunteer - IRS",
+    "Title": "",
+    "District": "",
+    "Counties": "",
+    "Email": "andiladewig@gmail.com",
+    "Phone": "",
+    "Website": "",
+    "Facebook": "",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Lauren ",
+    "Last Name": "Lakin",
+    "Role": "Candidate, Advisory Committee, Former candidate",
+    "Title": "House",
+    "District": "HD 95",
+    "Counties": "Marion, Hancock",
+    "Email": "lauren.b.lakin@gmail.com",
+    "Phone": 3179501044,
+    "Website": "https://www.votelauren.com/",
+    "Facebook": "https://www.facebook.com/laurenforin95",
+    "Instagram": "@electlaurenlakin",
+    "Home City": "Indianapolis",
+    "Home County": "Marion",
+    "Occupation": "Lawyer"
+  },
+  {
+    "First Name": "Paul",
+    "Last Name": "Lawler",
+    "Role": "Candidate",
+    "Title": "Senate",
+    "District": "SD 35",
+    "Counties": "Marion",
+    "Email": "drlawler7@gmail.com",
+    "Phone": "",
+    "Website": "https://lawlerforindiana.com",
+    "Facebook": "https://www.facebook.com/lawlerforindiana",
+    "Instagram": "@lawlerforindiana",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": "Social Worker"
+  },
+  {
+    "First Name": "Kendra ",
+    "Last Name": "Lawrence",
+    "Role": "Volunteer - IRS",
+    "Title": "IRS Youth Coalition Liason",
+    "District": "",
+    "Counties": "",
+    "Email": "lawrencekendra13@gmail.com",
+    "Phone": "",
+    "Website": "",
+    "Facebook": "",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Ryan",
+    "Last Name": "Locke",
+    "Role": "Candidate",
+    "Title": "Senate",
+    "District": "SD 29",
+    "Counties": "DeKalb, Steuben, Elkhart, Lagrange ",
+    "Email": "ryan@lockeforus.com",
+    "Phone": "",
+    "Website": "https://www.lockeforus.com/",
+    "Facebook": "https://www.facebook.com/lockeforusin",
+    "Instagram": "@lockeforusin",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Josh",
+    "Last Name": "Lowry",
+    "Role": "Candidate",
+    "Title": "House",
+    "District": "HD 24",
+    "Counties": "Boone",
+    "Email": "lowryjosh@gmail.com",
+    "Phone": 8123451234,
+    "Website": "https://www.joshlowry.com",
+    "Facebook": "https://www.facebook.com/electjoshlowry",
+    "Instagram": "",
+    "Home City": "Lebanon",
+    "Home County": "Boone",
+    "Occupation": "Retired Journalist; Communications Strategist"
+  },
+  {
+    "First Name": "Adam",
+    "Last Name": "Malcolm",
+    "Role": "Candidate",
+    "Title": "House",
+    "District": "HD 43",
+    "Counties": "Marion",
+    "Email": "adam@malcolmforindiana.com",
+    "Phone": "",
+    "Website": "https://www.malcolmforindiana.com",
+    "Facebook": "https://www.facebook.com/MalcolmforIndiana",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": "Data Analyst"
+  },
+  {
+    "First Name": "Tammy",
+    "Last Name": "Mendenhall",
+    "Role": "Candidate, Incumbent, Advisory Committee",
+    "Title": "House; District Chair (Central Region)",
+    "District": "HD 37",
+    "Counties": "Marion",
+    "Email": "tammy@mendenhallforindiana.com",
+    "Phone": "",
+    "Website": "https://www.mendenhallforindiana.com",
+    "Facebook": "https://www.facebook.com/mendenhallforindiana",
+    "Instagram": "",
+    "Home City": "Speedway",
+    "Home County": "Marion",
+    "Occupation": "Attorney and Military Spouse"
+  },
+  {
+    "First Name": "Mark ",
+    "Last Name": "Mellinger",
+    "Role": "Volunteer - IRS, Steering Committee",
+    "Title": "Region 9 Liaison",
+    "District": "",
+    "Counties": "Grant",
+    "Email": "markmellinger@gmail.com",
+    "Phone": "",
+    "Website": "",
+    "Facebook": "",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Tracy ",
+    "Last Name": "Melissa",
+    "Role": "Candidate",
+    "Title": "House",
+    "District": "HD 57",
+    "Counties": "Adams, Wells",
+    "Email": "tracymelissa4indiana@gmail.com",
+    "Phone": "",
+    "Website": "https://www.tracymelissa4indiana.com",
+    "Facebook": "https://www.facebook.com/Tracyforindiana",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "John ",
+    "Last Name": "Miller",
+    "Role": "Volunteer - IRS",
+    "Title": "Legislative Liaison",
+    "District": "Statewide",
+    "Counties": "",
+    "Email": "indiruralstm@gmail.com",
+    "Phone": "",
+    "Website": "",
+    "Facebook": "",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Kristen",
+    "Last Name": "Nalley",
+    "Role": "Candidate",
+    "Title": "House",
+    "District": "HD 77",
+    "Counties": "Gibson, Knox",
+    "Email": "knalley@vincennes.edu",
+    "Phone": "",
+    "Website": "https://www.nalley4indiana.com",
+    "Facebook": "https://www.facebook.com/profile.php?id=61578806832537",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Jesse ",
+    "Last Name": "Nixon",
+    "Role": "Volunteer - IRS, Steering Committee",
+    "Title": "Southern Region Liaison",
+    "District": "HD 79",
+    "Counties": "Perry",
+    "Email": "jpnixon6@gmail.com",
+    "Phone": 8128903969,
+    "Website": "",
+    "Facebook": "",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Cathy ",
+    "Last Name": "Pishny",
+    "Role": "Volunteer - IRS, Steering Committee",
+    "Title": "Eastern Region Liaison",
+    "District": "",
+    "Counties": "",
+    "Email": "cindypishny2@gmail.com",
+    "Phone": "",
+    "Website": "",
+    "Facebook": "",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Rosie",
+    "Last Name": "Plate",
+    "Role": "Candidate",
+    "Title": "House",
+    "District": "HD 95",
+    "Counties": "Marion, Hancock",
+    "Email": "roseforindiana@gmail.com",
+    "Phone": 3173951854,
+    "Website": "https://www.voterosie.com",
+    "Facebook": "https://www.facebook.com/voterosieplate",
+    "Instagram": "@voterosie",
+    "Home City": "Indianapolis",
+    "Home County": "Marion",
+    "Occupation": "Policy Advisor"
+  },
+  {
+    "First Name": "Thad",
+    "Last Name": "Purkeypile",
+    "Role": "Candidate",
+    "Title": "House",
+    "District": "HD 75",
+    "Counties": "Dubois, Martin, Pike, Daviess",
+    "Email": "thadpurkeypile@gmail.com",
+    "Phone": "",
+    "Website": "https://www.electthad.com",
+    "Facebook": "https://www.facebook.com/electthad",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Jarrod",
+    "Last Name": "Riggs",
+    "Role": "Candidate",
+    "Title": "House",
+    "District": "HD 97",
+    "Counties": "Madison",
+    "Email": "jarrodriggs.md@gmail.com",
+    "Phone": "",
+    "Website": "",
+    "Facebook": "?",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Jim",
+    "Last Name": "Rudy",
+    "Role": "Volunteer - IRS",
+    "Title": "Western Region Liaison",
+    "District": "Statewide",
+    "Counties": "White",
+    "Email": "jamesrudy@icloud.com",
+    "Phone": 7657180418,
+    "Website": "",
+    "Facebook": "",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "James",
+    "Last Name": "Rushing",
+    "Role": "Candidate",
+    "Title": "House",
+    "District": "HD 34",
+    "Counties": "Marion",
+    "Email": "jrushingforindiana@gmail.com",
+    "Phone": 3179073776,
+    "Website": "https://www.jamesrushing.org",
+    "Facebook": "https://www.facebook.com/jrushingforindiana",
+    "Instagram": "",
+    "Home City": "Indianapolis",
+    "Home County": "Marion",
+    "Occupation": "Finance/Legal"
+  },
+  {
+    "First Name": "Eric",
+    "Last Name": "Schneider",
+    "Role": "Candidate",
+    "Title": "House",
+    "District": "HD 21",
+    "Counties": "Howard",
+    "Email": "esforindiana@gmail.com",
+    "Phone": 7652196033,
+    "Website": "https://www.schneiderforindiana.com",
+    "Facebook": "https://www.facebook.com/schneiderforindiana",
+    "Instagram": "",
+    "Home City": "Kokomo",
+    "Home County": "Howard",
+    "Occupation": "Project Manager"
+  },
+  {
+    "First Name": "Melissa",
+    "Last Name": "Shapiro",
+    "Role": "Candidate, Steering Committee",
+    "Title": "Local",
+    "District": "",
+    "Counties": "",
+    "Email": "melissalshapiro@gmail.com",
+    "Phone": 2603162122,
+    "Website": "",
+    "Facebook": "https://www.facebook.com/melissalshapiro",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "James",
+    "Last Name": "Shaw",
+    "Role": "Volunteer - IRS, Steering Committee",
+    "Title": "Communications Director",
+    "District": "",
+    "Counties": "Monroe, Morgan",
+    "Email": "james.shaw93@gmail.com",
+    "Phone": 3176000806,
+    "Website": "",
+    "Facebook": "",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Dave",
+    "Last Name": "Shumaker",
+    "Role": "Candidate",
+    "Title": "House",
+    "District": "HD 89",
+    "Counties": "Marion",
+    "Email": "dave@electdaveshumaker.org",
+    "Phone": "",
+    "Website": "https://www.electdaveshumaker.org",
+    "Facebook": "https://www.facebook.com/daveshumakerhd89",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Brandon ",
+    "Last Name": "Smith",
+    "Role": "Candidate",
+    "Title": "House",
+    "District": "HD 84",
+    "Counties": "Allen",
+    "Email": "brandonsmithforindiana@gmail.com",
+    "Phone": "",
+    "Website": "https://www.brandonsmithforindiana.com",
+    "Facebook": "https://www.facebook.com/people/Brandon-Smith-for-Indiana/61571827867337/",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Zack ",
+    "Last Name": "Sorgius",
+    "Role": "Steering Committee, Volunteer - IRS",
+    "Title": "IRS Chair",
+    "District": "",
+    "Counties": "",
+    "Email": "szackary28@gmail.com",
+    "Phone": 8129296606,
+    "Website": "",
+    "Facebook": "https://www.facebook.com/zackary.sorgius",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Matt",
+    "Last Name": "Sorgius",
+    "Role": "Other",
+    "Title": "",
+    "District": "",
+    "Counties": "",
+    "Email": "sorgiusmatthew@gmail.com",
+    "Phone": "",
+    "Website": "",
+    "Facebook": "",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Tiffany",
+    "Last Name": "Stoner",
+    "Role": "Candidate",
+    "Title": "House",
+    "District": "HD 25",
+    "Counties": "Boone",
+    "Email": "tiffany@tiffanystoner.com",
+    "Phone": "",
+    "Website": "https://www.tiffanystoner.com",
+    "Facebook": "https://www.facebook.com/stoner4IN",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Nate",
+    "Last Name": "Stout",
+    "Role": "Candidate",
+    "Title": "House",
+    "District": "HD 38",
+    "Counties": "Carroll, Clinton, Sullivan",
+    "Email": "nate@stouteffect.com",
+    "Phone": "765-278-9858",
+    "Website": "https://hoosierstoelectnatestout.com",
+    "Facebook": "https://www.facebook.com/profile.php?id=61582997855213",
+    "Instagram": "",
+    "Home City": "Tipton",
+    "Home County": "Tipton",
+    "Occupation": "Consultant"
+  },
+  {
+    "First Name": "Corinne ",
+    "Last Name": "Straight",
+    "Role": "Other",
+    "Title": "Content Creator",
+    "District": "",
+    "Counties": "",
+    "Email": "corinne8m@gmail.com",
+    "Phone": "",
+    "Website": "",
+    "Facebook": "",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Ethan",
+    "Last Name": "Sweetland-May",
+    "Role": "Candidate",
+    "Title": "Senate",
+    "District": "SD 47",
+    "Counties": "Crawford, Harrison, Washington",
+    "Email": "ethanade@gmail.com",
+    "Phone": "502-424-3275",
+    "Website": "https://www.ethanforstatesenate.com",
+    "Facebook": "https://www.facebook.com/profile.php?id=61579278434516",
+    "Instagram": "",
+    "Home City": "New Albany",
+    "Home County": "Floyd",
+    "Occupation": "Sales (Account Executive)"
+  },
+  {
+    "First Name": "Tom ",
+    "Last Name": "Swihart",
+    "Role": "Other",
+    "Title": "",
+    "District": "",
+    "Counties": "",
+    "Email": "twswihart@gmail.com",
+    "Phone": "",
+    "Website": "",
+    "Facebook": "",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Carrie",
+    "Last Name": "Syczylo",
+    "Role": "Candidate",
+    "Title": "House",
+    "District": "HD 60",
+    "Counties": "Monroe, Morgan, Johnson",
+    "Email": "durite@iendeavor.com",
+    "Phone": "",
+    "Website": "",
+    "Facebook": "?",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Ross",
+    "Last Name": "Thomas",
+    "Role": "Candidate, Advisory Committee, Former candidate",
+    "Title": "Senate; Co. Chair",
+    "District": "SD 41",
+    "Counties": "Bartholomew, Johnson",
+    "Email": "rgt@earthlink.net",
+    "Phone": "",
+    "Website": "https://www.voterossthomas.com",
+    "Facebook": "https://www.facebook.com/rossthomasforIndSenate41",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Devon",
+    "Last Name": "Wellington",
+    "Role": "Candidate",
+    "Title": "House",
+    "District": "HD 29",
+    "Counties": "Hamilton",
+    "Email": "devon@vote.com",
+    "Phone": "(317)316-8378",
+    "Website": "https://www.votedevon.com",
+    "Facebook": "https://www.facebook.com/profile.php?id=61585977344123",
+    "Instagram": "@votedevonIN",
+    "Home City": "Noblesville",
+    "Home County": "Hamilton",
+    "Occupation": "Small Business Owner/ Education Policy Consulting"
+  },
+  {
+    "First Name": "Gi ",
+    "Last Name": "West",
+    "Role": "Candidate",
+    "Title": "Local",
+    "District": "",
+    "Counties": "",
+    "Email": "gpwest@mtu.edu",
+    "Phone": "",
+    "Website": "",
+    "Facebook": "",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Trish  ",
+    "Last Name": "Whitcomb",
+    "Role": "Advisory Committee",
+    "Title": "Advisory Board",
+    "District": "",
+    "Counties": "",
+    "Email": "t.Whitcomb.sipes@gmail.com",
+    "Phone": 8127672050,
+    "Website": "",
+    "Facebook": "https://www.facebook.com/trish.whitcomb1",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Karen",
+    "Last Name": "Whitney",
+    "Role": "Candidate",
+    "Title": "House",
+    "District": "HD 28",
+    "Counties": "Boone, Montgomery",
+    "Email": "winwithwhitney24@gmail.com",
+    "Phone": "",
+    "Website": "",
+    "Facebook": "No Campaign page?",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Sharon",
+    "Last Name": "Wight",
+    "Role": "Candidate",
+    "Title": "House",
+    "District": "HD 81",
+    "Counties": "Allen",
+    "Email": "Sharon.wight09@gmail.com",
+    "Phone": "",
+    "Website": "https://www.electsharonwight.com",
+    "Facebook": "https://www.facebook.com/electsharonwight",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Mary Ann ",
+    "Last Name": "Williams",
+    "Role": "Volunteer - IRS",
+    "Title": "Treasurer",
+    "District": "",
+    "Counties": "",
+    "Email": "ma_williams@sbcglobal.net",
+    "Phone": "",
+    "Website": "",
+    "Facebook": "",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Lisa",
+    "Last Name": "Williams",
+    "Role": "Volunteer - IRS, Steering Committee",
+    "Title": "Northern Region Liaison",
+    "District": "",
+    "Counties": "Steuben",
+    "Email": "lisa.williamsIN03@gmail.com",
+    "Phone": "",
+    "Website": "",
+    "Facebook": "https://www.facebook.com/lisa.williams.gill",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Candy",
+    "Last Name": "Wilmes Greer",
+    "Role": "Candidate",
+    "Title": "House",
+    "District": "HD 64",
+    "Counties": "",
+    "Email": "",
+    "Phone": "",
+    "Website": "",
+    "Facebook": "",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Christian ",
+    "Last Name": "Workman",
+    "Role": "Other",
+    "Title": "",
+    "District": "",
+    "Counties": "",
+    "Email": "cworkmanobh@gmail.com",
+    "Phone": "",
+    "Website": "",
+    "Facebook": "",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Kent ",
+    "Last Name": "Yeager",
+    "Role": "Advisory Committee",
+    "Title": "Agriculture / Farm / Rural Advisor",
+    "District": "Statewide",
+    "Counties": "",
+    "Email": "kentyeager@gmail.com",
+    "Phone": "",
+    "Website": "",
+    "Facebook": "https://www.facebook.com/kent.yeager.14",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  },
+  {
+    "First Name": "Stephanie Jo",
+    "Last Name": "Yocum",
+    "Role": "Candidate",
+    "Title": "House",
+    "District": "HD 88",
+    "Counties": "Hamilton, Madison, Marion",
+    "Email": "info@stephaniejoyocum.com",
+    "Phone": 4083872495,
+    "Website": "https://www.stephaniejoyocum.com",
+    "Facebook": "https://www.facebook.com/yocumforindiana",
+    "Instagram": "",
+    "Home City": "Indianapolis",
+    "Home County": "Marion",
+    "Occupation": "Nonprofit Executive"
+  },
+  {
+    "First Name": "Shelli ",
+    "Last Name": "Yoder",
+    "Role": "Candidate, Incumbent",
+    "Title": "Senate Minority Leader",
+    "District": "SD 40",
+    "Counties": "Monroe",
+    "Email": "shelliyoder@me.com",
+    "Phone": "",
+    "Website": "",
+    "Facebook": "https://www.facebook.com/Shellitg",
+    "Instagram": "",
+    "Home City": "",
+    "Home County": "",
+    "Occupation": ""
+  }
+];
+
         // Populate filter dropdowns
         function populateFilters() {
             // Split combined roles (e.g., "Candidate, Steering Committee" becomes ["Candidate", "Steering Committee"])
@@ -673,14 +2114,18 @@
             });
             const roles = [...allRoles].sort();
             
-            // Split combined districts (e.g., "HD 24, HD 25" becomes ["HD 24", "HD 25"])
+            // Split combined districts from ALL district columns
             const allDistricts = new Set();
             directoryData.forEach(d => {
-                if (d.District) {
-                    d.District.split(',').forEach(district => {
-                        allDistricts.add(district.trim());
-                    });
-                }
+                // Check District, Congressional District, House District, Senate District
+                ['District', 'Congressional District', 'House District', 'Senate District'].forEach(field => {
+                    if (d[field]) {
+                        d[field].split(',').forEach(district => {
+                            const trimmed = district.trim();
+                            if (trimmed) allDistricts.add(trimmed);
+                        });
+                    }
+                });
             });
             const districts = [...allDistricts].sort();
             
@@ -768,15 +2213,26 @@
         function renderDirectory() {
             const grid = document.getElementById('directoryGrid');
             
+            // Update classes based on view
+            if (currentView === 'list') {
+                grid.className = 'directory-list';
+            } else {
+                grid.className = 'directory-grid';
+            }
+            
             if (filteredData.length === 0) {
                 grid.innerHTML = `
-                    <div class="no-results">
+                    <div class="no-results" style="grid-column: 1 / -1;">
                         <h2>No contacts found</h2>
                         <p>Try adjusting your search or filters</p>
                     </div>
                 `;
             } else {
-                grid.innerHTML = filteredData.map(contact => createCard(contact)).join('');
+                if (currentView === 'list') {
+                    grid.innerHTML = filteredData.map(contact => createListItem(contact)).join('');
+                } else {
+                    grid.innerHTML = filteredData.map(contact => createCard(contact)).join('');
+                }
             }
 
             document.getElementById('totalCount').textContent = directoryData.length;
@@ -804,9 +2260,11 @@
                 const roleMatch = !roleFilter || 
                     (contact.Role && contact.Role.split(',').map(r => r.trim()).includes(roleFilter));
 
-                // District filter - check if selected district is in the person's districts
+                // District filter - check if selected district is in ANY of the person's district fields
                 const districtMatch = !districtFilter || 
-                    (contact.District && contact.District.split(',').map(d => d.trim()).includes(districtFilter));
+                    ['District', 'Congressional District', 'House District', 'Senate District'].some(field => 
+                        contact[field] && contact[field].split(',').map(d => d.trim()).includes(districtFilter)
+                    );
 
                 // County filter - check if selected county is in the person's counties
                 const countyMatch = !countyFilter || 
@@ -825,6 +2283,45 @@
             document.getElementById('districtFilter').value = '';
             document.getElementById('countyFilter').value = '';
             applyFilters();
+        }
+
+        // View switching
+        let currentView = 'grid';
+        
+        function switchView(view) {
+            currentView = view;
+            document.getElementById('gridViewBtn').classList.toggle('active', view === 'grid');
+            document.getElementById('listViewBtn').classList.toggle('active', view === 'list');
+            renderDirectory();
+        }
+
+        function createListItem(contact) {
+            const firstName = contact['First Name'] || '';
+            const lastName = contact['Last Name'] || '';
+            const email = contact.Email || '';
+            const phone = contact.Phone || '';
+            
+            return `
+                <div class="list-item">
+                    <div>
+                        <div class="list-name">${firstName} ${lastName}</div>
+                        ${contact.Role ? `<div class="list-role">${contact.Role}</div>` : ''}
+                    </div>
+                    <div class="list-location">
+                        ${contact['Home City'] ? contact['Home City'] + (contact['Home County'] ? ', ' + contact['Home County'] : '') : '—'}
+                    </div>
+                    <div class="list-district">
+                        ${contact.District || '—'}
+                    </div>
+                    <div class="list-location">
+                        ${contact.Occupation || '—'}
+                    </div>
+                    <div class="list-actions">
+                        ${email ? `<a href="mailto:${email}">📧</a>` : ''}
+                        ${phone ? `<a href="tel:${phone}">📞</a>` : ''}
+                    </div>
+                </div>
+            `;
         }
 
         // Event listeners
@@ -1000,6 +2497,19 @@
                         <div class="form-group">
                             <label>Instagram Handle</label>
                             <input type="text" name="entry.1296903544" placeholder="@yourusername">
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Headshot Photo</h3>
+                        <div class="info-notice">
+                            📸 <strong>To upload your headshot:</strong><br>
+                            After submitting this form, please upload your headshot photo to this folder:<br>
+                            <a href="https://drive.google.com/drive/folders/1EeAPR8MXQcSMHgfspkuTKpdMdYV7Vtm6HukW3VYwUxqkF15rJcnmgS3UskoykzY4BPHRf3di" 
+                               target="_blank" style="color: #1e40af; font-weight: 600;">
+                               📁 Upload Headshot Here
+                            </a><br>
+                            <small>Name your file: FirstName_LastName.jpg (e.g., John_Smith.jpg)</small>
                         </div>
                     </div>
 
