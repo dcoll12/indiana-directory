@@ -1977,7 +1977,17 @@
 
         // Populate filter dropdowns
         function populateFilters() {
-            const roles = [...new Set(directoryData.map(d => d.Role).filter(r => r))].sort();
+            // Split combined roles (e.g., "Candidate, Steering Committee" becomes ["Candidate", "Steering Committee"])
+            const allRoles = new Set();
+            directoryData.forEach(d => {
+                if (d.Role) {
+                    d.Role.split(',').forEach(role => {
+                        allRoles.add(role.trim());
+                    });
+                }
+            });
+            const roles = [...allRoles].sort();
+            
             const districts = [...new Set(directoryData.map(d => d.District).filter(d => d))].sort();
             const counties = [...new Set(directoryData.flatMap(d => 
                 d.Counties ? d.Counties.split(',').map(c => c.trim()) : []
@@ -2094,8 +2104,9 @@
                     (contact['Home City'] && contact['Home City'].toLowerCase().includes(searchTerm)) ||
                     (contact.Counties && contact.Counties.toLowerCase().includes(searchTerm));
 
-                // Role filter
-                const roleMatch = !roleFilter || contact.Role === roleFilter;
+                // Role filter - check if selected role is in the person's roles
+                const roleMatch = !roleFilter || 
+                    (contact.Role && contact.Role.split(',').map(r => r.trim()).includes(roleFilter));
 
                 // District filter
                 const districtMatch = !districtFilter || contact.District === districtFilter;
