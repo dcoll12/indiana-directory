@@ -366,6 +366,23 @@
             padding: 0 40px 40px 40px;
         }
 
+        .list-header {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 150px;
+            gap: 20px;
+            padding: 15px 20px;
+            background: #f8fafc;
+            border-bottom: 2px solid #e2e8f0;
+            font-weight: 700;
+            color: #475569;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
         .list-item {
             background: white;
             border: 2px solid #e2e8f0;
@@ -429,9 +446,14 @@
         }
 
         @media (max-width: 1200px) {
+            .list-header,
             .list-item {
                 grid-template-columns: 1fr;
                 gap: 10px;
+            }
+            
+            .list-header {
+                display: none;
             }
             
             .list-actions {
@@ -2229,7 +2251,16 @@
                 `;
             } else {
                 if (currentView === 'list') {
-                    grid.innerHTML = filteredData.map(contact => createListItem(contact)).join('');
+                    const header = `
+                        <div class="list-header">
+                            <div>Name & Role</div>
+                            <div>Location</div>
+                            <div>District</div>
+                            <div>Occupation</div>
+                            <div>Contact</div>
+                        </div>
+                    `;
+                    grid.innerHTML = header + filteredData.map(contact => createListItem(contact)).join('');
                 } else {
                     grid.innerHTML = filteredData.map(contact => createCard(contact)).join('');
                 }
