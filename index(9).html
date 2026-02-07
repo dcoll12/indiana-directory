@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indiana Rural Summit Directory</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+
+        .header-buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .header-btn {
+            padding: 12px 24px;
+            background: white;
+            color: #1e3a8a;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .header-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .header-btn.secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #64748b;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #e2e8f0;
+            border-top-color: #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .controls {
+            padding: 30px 40px;
+            background: #f8fafc;
+            border-bottom: 2px solid #e2e8f0;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 20px;
+            font-size: 1rem;
+            border: 2px solid #cbd5e1;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        select {
+            padding: 12px 16px;
+            font-size: 1rem;
+            border: 2px solid #cbd5e1;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        select:hover {
+            border-color: #3b82f6;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .stats {
+            padding: 15px 40px;
+            background: #eff6ff;
+            border-bottom: 1px solid #dbeafe;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .stats-item {
+            font-size: 1rem;
+            color: #1e40af;
+            font-weight: 600;
+        }
+
+        .last-updated {
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .directory-grid {
+            padding: 40px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+        }
+
+        .contact-card {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 25px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .contact-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border-color: #3b82f6;
+        }
+
+        .contact-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .contact-header {
+            margin-bottom: 15px;
+        }
+
+        .contact-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+
+        .contact-role {
+            font-size: 0.95rem;
+            color: #3b82f6;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .contact-title {
+            font-size: 0.9rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .contact-info {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .info-row {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #475569;
+            min-width: 90px;
+            flex-shrink: 0;
+        }
+
+        .info-value {
+            color: #64748b;
+            word-break: break-word;
+        }
+
+        .info-value a {
+            color: #3b82f6;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .info-value a:hover {
+            color: #2563eb;
+            text-decoration: underline;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e2e8f0;
+            flex-wrap: wrap;
+        }
+
+        .social-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 8px 14px;
+            background: #eff6ff;
+            color: #1e40af;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .social-btn:hover {
+            background: #3b82f6;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .card-action-btn {
+            background: #10b981;
+            color: white;
+        }
+
+        .card-action-btn:hover {
+            background: #059669;
+        }
+
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px 20px;
+            color: #64748b;
+        }
+
+        .no-results h2 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #475569;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            background: #dbeafe;
+            color: #1e40af;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c00;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 8px;
+            border: 2px solid #fcc;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 50px auto;
+            padding: 0;
+            border-radius: 12px;
+            max-width: 800px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .modal-header h2 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .close {
+            color: white;
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 35px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            opacity: 0.7;
+        }
+
+        .form-section {
+            margin-bottom: 25px;
+        }
+
+        .form-section h3 {
+            color: #1e3a8a;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #475569;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .submit-btn:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .controls {
+                padding: 20px;
+            }
+
+            .directory-grid {
+                grid-template-columns: 1fr;
+                padding: 20px;
+            }
+
+            .stats {
+                padding: 15px 20px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                margin: 20px;
+                width: calc(100% - 40px);
+            }
+        }
+
+        .reset-btn {
+            padding: 12px 24px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .reset-btn:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+        }
+
+        .info-notice {
+            background: #dbeafe;
+            border-left: 4px solid #3b82f6;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            color: #1e40af;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Indiana Rural Summit Directory</h1>
+            <p>Connect with candidates, volunteers, and committee members across Indiana</p>
+            <div class="header-buttons">
+                <button class="header-btn" onclick="openSubmitModal()">📝 Submit Your Info</button>
+                <button class="header-btn secondary" onclick="openUpdateModal()">✏️ Update/Correct Info</button>
+            </div>
+        </div>
+
+        <div id="loadingIndicator" class="loading">
+            <div class="loading-spinner"></div>
+            <p>Loading directory from Google Sheets...</p>
+        </div>
+
+        <div id="mainContent" style="display: none;">
+            <div class="controls">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="🔍 Search by name, location, or occupation...">
+                </div>
+                <div class="filter-group">
+                    <select id="roleFilter">
+                        <option value="">All Roles</option>
+                    </select>
+                    <select id="districtFilter">
+                        <option value="">All Districts</option>
+                    </select>
+                    <select id="countyFilter">
+                        <option value="">All Counties</option>
+                    </select>
+                    <button class="reset-btn" id="resetBtn">Reset Filters</button>
+                </div>
+            </div>
+
+            <div class="stats">
+                <div>
+                    <span class="stats-item">Total Contacts: <span id="totalCount">0</span></span>
+                    <span class="stats-item" style="margin-left: 20px;">Showing: <span id="visibleCount">0</span></span>
+                </div>
+                <div class="last-updated">
+                    Last updated: <span id="lastUpdated"></span>
+                </div>
+            </div>
+
+            <div class="directory-grid" id="directoryGrid">
+                <!-- Cards will be inserted here by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Submit Info Modal -->
+    <div id="submitModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close" onclick="closeModal('submitModal')">&times;</span>
+                <h2>Submit Your Information</h2>
+                <p>Join the Indiana Rural Summit directory</p>
+            </div>
+            <div class="modal-body">
+                <div class="info-notice">
+                    📋 <strong>Note:</strong> This form will submit your information to our team for review. Your information will be added to the directory once approved.
+                </div>
+                
+                <form id="submitForm" action="YOUR_GOOGLE_FORM_URL_HERE" method="POST" target="hidden_iframe">
+                    <div class="form-section">
+                        <h3>Personal Information</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>First Name *</label>
+                                <input type="text" name="entry.XXXXX" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Last Name *</label>
+                                <input type="text" name="entry.XXXXX" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Email *</label>
+                                <input type="email" name="entry.XXXXX" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Phone</label>
+                                <input type="tel" name="entry.XXXXX">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Role & Position</h3>
+                        <div class="form-group">
+                            <label>Role *</label>
+                            <select name="entry.XXXXX" required>
+                                <option value="">Select your role...</option>
+                                <option value="Candidate">Candidate</option>
+                                <option value="Volunteer - IRS">Volunteer - IRS</option>
+                                <option value="Steering Committee">Steering Committee</option>
+                                <option value="Advisory Committee">Advisory Committee</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Title</label>
+                                <input type="text" name="entry.XXXXX" placeholder="e.g., House, Senate">
+                            </div>
+                            <div class="form-group">
+                                <label>District</label>
+                                <input type="text" name="entry.XXXXX" placeholder="e.g., HD 53, SD 15">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Location & Background</h3>
+                        <div class="form-group">
+                            <label>Counties</label>
+                            <input type="text" name="entry.XXXXX" placeholder="e.g., Allen, Marion">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Home City</label>
+                                <input type="text" name="entry.XXXXX">
+                            </div>
+                            <div class="form-group">
+                                <label>Home County</label>
+                                <input type="text" name="entry.XXXXX">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Occupation</label>
+                            <input type="text" name="entry.XXXXX">
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Online Presence</h3>
+                        <div class="form-group">
+                            <label>Website</label>
+                            <input type="url" name="entry.XXXXX" placeholder="https://">
+                        </div>
+                        <div class="form-group">
+                            <label>Facebook URL</label>
+                            <input type="url" name="entry.XXXXX" placeholder="https://facebook.com/...">
+                        </div>
+                        <div class="form-group">
+                            <label>Instagram Handle</label>
+                            <input type="text" name="entry.XXXXX" placeholder="@yourusername">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Submit Information</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Info Modal -->
+    <div id="updateModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close" onclick="closeModal('updateModal')">&times;</span>
+                <h2>Update or Correct Your Information</h2>
+                <p>Request changes to your existing directory listing</p>
+            </div>
+            <div class="modal-body">
+                <div class="info-notice">
+                    ✏️ <strong>Note:</strong> Use this form to request corrections or updates to your existing directory entry.
+                </div>
+                
+                <form id="updateForm" action="YOUR_GOOGLE_FORM_URL_HERE" method="POST" target="hidden_iframe">
+                    <div class="form-group">
+                        <label>Your Name (as it appears in directory) *</label>
+                        <input type="text" name="entry.XXXXX" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Email *</label>
+                        <input type="email" name="entry.XXXXX" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>What would you like to update? *</label>
+                        <textarea name="entry.XXXXX" required placeholder="Please describe the information you'd like to add, correct, or update..."></textarea>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Submit Update Request</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden iframe for form submission -->
+    <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
+
+    <script>
+        // Configuration - UPDATE THESE VALUES
+        const SPREADSHEET_ID = '1jJUkXqj4o4pAhQLoRVjwB0VGROsoD6jBKCTQafiCOHw';
+        const SHEET_NAME = 'DIRECTORY';
+
+        let directoryData = [];
+        let filteredData = [];
+
+        // Modal functions
+        function openSubmitModal() {
+            document.getElementById('submitModal').style.display = 'block';
+        }
+
+        function openUpdateModal() {
+            document.getElementById('updateModal').style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+
+        // Form submission handlers
+        document.getElementById('submitForm').addEventListener('submit', function() {
+            setTimeout(function() {
+                alert('Thank you! Your information has been submitted and will be reviewed by our team.');
+                closeModal('submitModal');
+                document.getElementById('submitForm').reset();
+            }, 1000);
+        });
+
+        document.getElementById('updateForm').addEventListener('submit', function() {
+            setTimeout(function() {
+                alert('Thank you! Your update request has been submitted.');
+                closeModal('updateModal');
+                document.getElementById('updateForm').reset();
+            }, 1000);
+        });
+
+        // Fetch data from Google Sheets
+        async function fetchSheetData() {
+            try {
+                const csvUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&sheet=${SHEET_NAME}`;
+                
+                const response = await fetch(csvUrl);
+                const csvText = await response.text();
+                
+                directoryData = parseCSV(csvText);
+                
+                document.getElementById('loadingIndicator').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+                
+                document.getElementById('lastUpdated').textContent = new Date().toLocaleString();
+                
+                populateFilters();
+                applyFilters();
+                
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                document.getElementById('loadingIndicator').innerHTML = `
+                    <div class="error-message">
+                        <h2>⚠️ Unable to load directory</h2>
+                        <p><strong>Please make sure:</strong></p>
+                        <ol style="text-align: left; max-width: 500px; margin: 20px auto;">
+                            <li>The Google Sheet is set to "Anyone with the link can view"</li>
+                            <li>The sheet name is exactly "DIRECTORY"</li>
+                            <li>Your browser allows loading content from Google Sheets</li>
+                        </ol>
+                        <p style="margin-top: 20px;"><a href="#" onclick="location.reload()" style="color: #3b82f6;">Click here to retry</a></p>
+                    </div>
+                `;
+            }
+        }
+
+        // Parse CSV data
+        function parseCSV(csv) {
+            const lines = csv.split('\n');
+            const headers = lines[0].split(',').map(h => h.replace(/"/g, '').trim());
+            
+            const data = [];
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i].trim()) continue;
+                
+                const values = [];
+                let currentValue = '';
+                let insideQuotes = false;
+                
+                for (let char of lines[i]) {
+                    if (char === '"') {
+                        insideQuotes = !insideQuotes;
+                    } else if (char === ',' && !insideQuotes) {
+                        values.push(currentValue.trim());
+                        currentValue = '';
+                    } else {
+                        currentValue += char;
+                    }
+                }
+                values.push(currentValue.trim());
+                
+                const row = {};
+                headers.forEach((header, index) => {
+                    row[header] = values[index] ? values[index].replace(/"/g, '') : '';
+                });
+                
+                data.push(row);
+            }
+            
+            return data;
+        }
+
+        // Populate filter dropdowns
+        function populateFilters() {
+            const roles = [...new Set(directoryData.map(d => d.Role).filter(r => r))].sort();
+            const districts = [...new Set(directoryData.map(d => d.District).filter(d => d))].sort();
+            const counties = [...new Set(directoryData.flatMap(d => 
+                d.Counties ? d.Counties.split(',').map(c => c.trim()) : []
+            ))].sort();
+
+            const roleFilter = document.getElementById('roleFilter');
+            const districtFilter = document.getElementById('districtFilter');
+            const countyFilter = document.getElementById('countyFilter');
+
+            roleFilter.innerHTML = '<option value="">All Roles</option>';
+            districtFilter.innerHTML = '<option value="">All Districts</option>';
+            countyFilter.innerHTML = '<option value="">All Counties</option>';
+
+            roles.forEach(role => {
+                const option = document.createElement('option');
+                option.value = role;
+                option.textContent = role;
+                roleFilter.appendChild(option);
+            });
+
+            districts.forEach(district => {
+                const option = document.createElement('option');
+                option.value = district;
+                option.textContent = district;
+                districtFilter.appendChild(option);
+            });
+
+            counties.forEach(county => {
+                const option = document.createElement('option');
+                option.value = county;
+                option.textContent = county;
+                countyFilter.appendChild(option);
+            });
+        }
+
+        // Format phone number
+        function formatPhone(phone) {
+            if (!phone) return '';
+            const phoneStr = String(phone);
+            if (phoneStr.length === 10) {
+                return `(${phoneStr.slice(0,3)}) ${phoneStr.slice(3,6)}-${phoneStr.slice(6)}`;
+            }
+            return phoneStr;
+        }
+
+        // Create contact card HTML
+        function createCard(contact) {
+            const hasWebsite = contact.Website && contact.Website !== '?' && contact.Website.startsWith('http');
+            const hasFacebook = contact.Facebook && contact.Facebook !== '?' && contact.Facebook !== 'No Campaign page?' && contact.Facebook.startsWith('http');
+            const hasInstagram = contact.Instagram && contact.Instagram !== '?' && contact.Instagram !== '';
+
+            return `
+                <div class="contact-card">
+                    <div class="contact-header">
+                        <div class="contact-name">${contact['First Name'] || ''} ${contact['Last Name'] || ''}</div>
+                        ${contact.Role ? `<div class="contact-role">${contact.Role}</div>` : ''}
+                        ${contact.Title ? `<div class="contact-title">${contact.Title}</div>` : ''}
+                        ${contact.District ? `<span class="badge">${contact.District}</span>` : ''}
+                    </div>
+                    
+                    <div class="contact-info">
+                        ${contact.Counties ? `<div class="info-row"><span class="info-label">Counties:</span><span class="info-value">${contact.Counties}</span></div>` : ''}
+                        ${contact['Home City'] ? `<div class="info-row"><span class="info-label">Location:</span><span class="info-value">${contact['Home City']}${contact['Home County'] ? ', ' + contact['Home County'] : ''}</span></div>` : ''}
+                        ${contact.Occupation ? `<div class="info-row"><span class="info-label">Occupation:</span><span class="info-value">${contact.Occupation}</span></div>` : ''}
+                        ${contact.Email ? `<div class="info-row"><span class="info-label">Email:</span><span class="info-value"><a href="mailto:${contact.Email}">${contact.Email}</a></span></div>` : ''}
+                        ${contact.Phone ? `<div class="info-row"><span class="info-label">Phone:</span><span class="info-value"><a href="tel:${contact.Phone}">${formatPhone(contact.Phone)}</a></span></div>` : ''}
+                    </div>
+                    
+                    <div class="social-links">
+                        ${hasWebsite ? `<a href="${contact.Website}" target="_blank" class="social-btn">🌐 Website</a>` : ''}
+                        ${hasFacebook ? `<a href="${contact.Facebook}" target="_blank" class="social-btn">📘 Facebook</a>` : ''}
+                        ${hasInstagram ? `<a href="https://instagram.com/${contact.Instagram.replace('@', '')}" target="_blank" class="social-btn">📸 Instagram</a>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Render directory
+        function renderDirectory() {
+            const grid = document.getElementById('directoryGrid');
+            
+            if (filteredData.length === 0) {
+                grid.innerHTML = `
+                    <div class="no-results">
+                        <h2>No contacts found</h2>
+                        <p>Try adjusting your search or filters</p>
+                    </div>
+                `;
+            } else {
+                grid.innerHTML = filteredData.map(contact => createCard(contact)).join('');
+            }
+
+            document.getElementById('totalCount').textContent = directoryData.length;
+            document.getElementById('visibleCount').textContent = filteredData.length;
+        }
+
+        // Filter logic
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const roleFilter = document.getElementById('roleFilter').value;
+            const districtFilter = document.getElementById('districtFilter').value;
+            const countyFilter = document.getElementById('countyFilter').value;
+
+            filteredData = directoryData.filter(contact => {
+                const searchMatch = !searchTerm || 
+                    (contact['First Name'] && contact['First Name'].toLowerCase().includes(searchTerm)) ||
+                    (contact['Last Name'] && contact['Last Name'].toLowerCase().includes(searchTerm)) ||
+                    (contact.Role && contact.Role.toLowerCase().includes(searchTerm)) ||
+                    (contact.Occupation && contact.Occupation.toLowerCase().includes(searchTerm)) ||
+                    (contact['Home City'] && contact['Home City'].toLowerCase().includes(searchTerm)) ||
+                    (contact.Counties && contact.Counties.toLowerCase().includes(searchTerm));
+
+                const roleMatch = !roleFilter || contact.Role === roleFilter;
+                const districtMatch = !districtFilter || contact.District === districtFilter;
+                const countyMatch = !countyFilter || 
+                    (contact.Counties && contact.Counties.split(',').map(c => c.trim()).includes(countyFilter));
+
+                return searchMatch && roleMatch && districtMatch && countyMatch;
+            });
+
+            renderDirectory();
+        }
+
+        // Reset filters
+        function resetFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('roleFilter').value = '';
+            document.getElementById('districtFilter').value = '';
+            document.getElementById('countyFilter').value = '';
+            applyFilters();
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('searchInput').addEventListener('input', applyFilters);
+            document.getElementById('roleFilter').addEventListener('change', applyFilters);
+            document.getElementById('districtFilter').addEventListener('change', applyFilters);
+            document.getElementById('countyFilter').addEventListener('change', applyFilters);
+            document.getElementById('resetBtn').addEventListener('click', resetFilters);
+            
+            fetchSheetData();
+        });
+    </script>
+</body>
+</html>
