@@ -1988,7 +1988,18 @@
             });
             const roles = [...allRoles].sort();
             
-            const districts = [...new Set(directoryData.map(d => d.District).filter(d => d))].sort();
+            // Split combined districts (e.g., "HD 24, HD 25" becomes ["HD 24", "HD 25"])
+            const allDistricts = new Set();
+            directoryData.forEach(d => {
+                if (d.District) {
+                    d.District.split(',').forEach(district => {
+                        allDistricts.add(district.trim());
+                    });
+                }
+            });
+            const districts = [...allDistricts].sort();
+            
+            // Split combined counties (already doing this correctly)
             const counties = [...new Set(directoryData.flatMap(d => 
                 d.Counties ? d.Counties.split(',').map(c => c.trim()) : []
             ))].sort();
@@ -2108,10 +2119,11 @@
                 const roleMatch = !roleFilter || 
                     (contact.Role && contact.Role.split(',').map(r => r.trim()).includes(roleFilter));
 
-                // District filter
-                const districtMatch = !districtFilter || contact.District === districtFilter;
+                // District filter - check if selected district is in the person's districts
+                const districtMatch = !districtFilter || 
+                    (contact.District && contact.District.split(',').map(d => d.trim()).includes(districtFilter));
 
-                // County filter
+                // County filter - check if selected county is in the person's counties
                 const countyMatch = !countyFilter || 
                     (contact.Counties && contact.Counties.split(',').map(c => c.trim()).includes(countyFilter));
 
