@@ -546,10 +546,16 @@
                 console.log('CSV received, length:', csvText.length);
                 
                 directoryData = parseCSV(csvText);
-                console.log('Parsed data:', directoryData.length, 'contacts');
+                console.log('Parsed contacts:', directoryData.length);
                 
                 if (directoryData.length === 0) {
                     throw new Error('No data found in sheet');
+                }
+                
+                // Debug: Log first contact to see structure
+                if (directoryData.length > 0) {
+                    console.log('First contact data:', directoryData[0]);
+                    console.log('Keys in first contact:', Object.keys(directoryData[0]));
                 }
                 
                 populateFilters();
@@ -2020,14 +2026,16 @@
 
         // Create contact card HTML
         function createCard(contact) {
-            const hasWebsite = contact.Website && contact.Website !== '?';
-            const hasFacebook = contact.Facebook && contact.Facebook !== '?' && contact.Facebook !== 'No Campaign page?';
-            const hasInstagram = contact.Instagram && contact.Instagram !== '?';
+            const firstName = contact['First Name'] || '';
+            const lastName = contact['Last Name'] || '';
+            const hasWebsite = contact.Website && contact.Website !== '?' && contact.Website.startsWith('http');
+            const hasFacebook = contact.Facebook && contact.Facebook !== '?' && contact.Facebook !== 'No Campaign page?' && contact.Facebook.startsWith('http');
+            const hasInstagram = contact.Instagram && contact.Instagram !== '?' && contact.Instagram !== '';
 
             return `
                 <div class="contact-card">
                     <div class="contact-header">
-                        <div class="contact-name">${contact['First Name']} ${contact['Last Name']}</div>
+                        <div class="contact-name">${firstName} ${lastName}</div>
                         ${contact.Role ? `<div class="contact-role">${contact.Role}</div>` : ''}
                         ${contact.Title ? `<div class="contact-title">${contact.Title}</div>` : ''}
                         ${contact.District ? `<span class="badge">${contact.District}</span>` : ''}
@@ -2041,13 +2049,11 @@
                         ${contact.Phone ? `<div class="info-row"><span class="info-label">Phone:</span><span class="info-value"><a href="tel:${contact.Phone}">${formatPhone(contact.Phone)}</a></span></div>` : ''}
                     </div>
                     
-                    ${hasWebsite || hasFacebook || hasInstagram ? `
                     <div class="social-links">
                         ${hasWebsite ? `<a href="${contact.Website}" target="_blank" class="social-btn">🌐 Website</a>` : ''}
                         ${hasFacebook ? `<a href="${contact.Facebook}" target="_blank" class="social-btn">📘 Facebook</a>` : ''}
                         ${hasInstagram ? `<a href="https://instagram.com/${contact.Instagram.replace('@', '')}" target="_blank" class="social-btn">📸 Instagram</a>` : ''}
                     </div>
-                    ` : ''}
                 </div>
             `;
         }
