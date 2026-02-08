@@ -2205,16 +2205,37 @@
             const hasFacebook = contact.Facebook && contact.Facebook !== '?' && contact.Facebook !== 'No Campaign page?' && contact.Facebook.startsWith('http');
             const hasInstagram = contact.Instagram && contact.Instagram !== '?' && contact.Instagram !== '';
 
+            // Determine which district they're running for based on Title
+            let runningForDistrict = '';
+            const title = (contact.Title || '').toLowerCase();
+            
+            if (title.includes('house')) {
+                runningForDistrict = contact['House District'] || contact.District || '';
+            } else if (title.includes('senate')) {
+                runningForDistrict = contact['Senate District'] || contact.District || '';
+            } else if (title.includes('congress')) {
+                runningForDistrict = contact['Congressional District'] || contact.District || '';
+            } else {
+                runningForDistrict = contact.District || '';
+            }
+
+            // Collect all district info for display
+            const districtInfo = [];
+            if (contact['House District']) districtInfo.push(`House: ${contact['House District']}`);
+            if (contact['Senate District']) districtInfo.push(`Senate: ${contact['Senate District']}`);
+            if (contact['Congressional District']) districtInfo.push(`Congressional: ${contact['Congressional District']}`);
+
             return `
                 <div class="contact-card">
                     <div class="contact-header">
                         <div class="contact-name">${firstName} ${lastName}</div>
                         ${contact.Role ? `<div class="contact-role">${contact.Role}</div>` : ''}
                         ${contact.Title ? `<div class="contact-title">${contact.Title}</div>` : ''}
-                        ${contact.District ? `<span class="badge">${contact.District}</span>` : ''}
+                        ${runningForDistrict ? `<span class="badge">Running for: ${runningForDistrict}</span>` : ''}
                     </div>
                     
                     <div class="contact-info">
+                        ${districtInfo.length > 0 ? `<div class="info-row"><span class="info-label">Districts:</span><span class="info-value">${districtInfo.join(' | ')}</span></div>` : ''}
                         ${contact.Counties ? `<div class="info-row"><span class="info-label">Counties:</span><span class="info-value">${contact.Counties}</span></div>` : ''}
                         ${contact['Home City'] ? `<div class="info-row"><span class="info-label">Location:</span><span class="info-value">${contact['Home City']}${contact['Home County'] ? ', ' + contact['Home County'] : ''}</span></div>` : ''}
                         ${contact.Occupation ? `<div class="info-row"><span class="info-label">Occupation:</span><span class="info-value">${contact.Occupation}</span></div>` : ''}
@@ -2552,7 +2573,7 @@
                         <div class="info-notice">
                             📸 <strong>To upload your headshot:</strong><br>
                             After submitting this form, please upload your headshot photo to this folder:<br>
-                            <a href="https://drive.google.com/drive/folders/1PSzd3gpk-vlcaaqpG7uYUrSfnejh562o?usp=drive_link" 
+                            <a href="https://drive.google.com/drive/folders/1EeAPR8MXQcSMHgfspkuTKpdMdYV7Vtm6HukW3VYwUxqkF15rJcnmgS3UskoykzY4BPHRf3di" 
                                target="_blank" style="color: #1e40af; font-weight: 600;">
                                📁 Upload Headshot Here
                             </a><br>
