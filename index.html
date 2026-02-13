@@ -891,6 +891,8 @@
             const hasWebsite = contact.Website && contact.Website !== '?' && contact.Website.startsWith('http');
             const hasFacebook = contact.Facebook && contact.Facebook !== '?' && contact.Facebook !== 'No Campaign page?' && contact.Facebook.startsWith('http');
             const hasInstagram = contact.Instagram && contact.Instagram !== '?' && contact.Instagram !== '';
+            const hasOtherSocial1 = contact['Other Social 1'] && contact['Other Social 1'].trim() !== '' && contact['Other Social 1'].startsWith('http');
+            const hasOtherSocial2 = contact['Other Social 2'] && contact['Other Social 2'].trim() !== '' && contact['Other Social 2'].startsWith('http');
 
             // Determine which district they're running for based on Title
             let runningForDistrict = '';
@@ -937,6 +939,8 @@
                         ${hasWebsite ? `<a href="${contact.Website}" target="_blank" class="social-btn">🌐 Website</a>` : ''}
                         ${hasFacebook ? `<a href="${contact.Facebook}" target="_blank" class="social-btn">📘 Facebook</a>` : ''}
                         ${hasInstagram ? `<a href="https://instagram.com/${contact.Instagram.replace('@', '')}" target="_blank" class="social-btn">📸 Instagram</a>` : ''}
+                        ${hasOtherSocial1 ? `<a href="${contact['Other Social 1']}" target="_blank" class="social-btn">🔗 ${new URL(contact['Other Social 1']).hostname.replace('www.', '')}</a>` : ''}
+                        ${hasOtherSocial2 ? `<a href="${contact['Other Social 2']}" target="_blank" class="social-btn">🔗 ${new URL(contact['Other Social 2']).hostname.replace('www.', '')}</a>` : ''}
                     </div>
                 </div>
             `;
@@ -1057,7 +1061,9 @@
             const hasWebsite = contact.Website && contact.Website !== '?' && contact.Website.startsWith('http');
             const hasFacebook = contact.Facebook && contact.Facebook !== '?' && contact.Facebook !== 'No Campaign page?' && contact.Facebook.startsWith('http');
             const hasInstagram = contact.Instagram && contact.Instagram !== '?' && contact.Instagram !== '';
-            
+            const hasOtherSocial1 = contact['Other Social 1'] && contact['Other Social 1'].trim() !== '' && contact['Other Social 1'].startsWith('http');
+            const hasOtherSocial2 = contact['Other Social 2'] && contact['Other Social 2'].trim() !== '' && contact['Other Social 2'].startsWith('http');
+
             return `
                 <div class="list-item">
                     <div>
@@ -1079,6 +1085,8 @@
                         ${hasWebsite ? `<a href="${contact.Website}" target="_blank" title="Website">🌐</a>` : ''}
                         ${hasFacebook ? `<a href="${contact.Facebook}" target="_blank" title="Facebook">📘</a>` : ''}
                         ${hasInstagram ? `<a href="https://instagram.com/${contact.Instagram.replace('@', '')}" target="_blank" title="Instagram">📸</a>` : ''}
+                        ${hasOtherSocial1 ? `<a href="${contact['Other Social 1']}" target="_blank" title="Other Social">🔗</a>` : ''}
+                        ${hasOtherSocial2 ? `<a href="${contact['Other Social 2']}" target="_blank" title="Other Social">🔗</a>` : ''}
                     </div>
                 </div>
             `;
