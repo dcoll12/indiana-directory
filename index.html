@@ -918,11 +918,10 @@
                         <div class="contact-name">${firstName} ${lastName}</div>
                         ${contact.Role ? `<div class="contact-role">${contact.Role}</div>` : ''}
                         ${contact.Title ? `<div class="contact-title">${contact.Title}</div>` : ''}
-                        ${runningForDistrict ? `<span class="badge">${(contact.Role || '').toLowerCase().includes('former candidate') ? 'Ran for' : 'Running for'}: ${runningForDistrict}</span>` : ''}
+                        ${runningForDistrict && !(contact.Role || '').toLowerCase().includes('former candidate') ? `<span class="badge">Running for: ${runningForDistrict}</span>` : ''}
                     </div>
                     
                     <div class="contact-info">
-                        ${(contact.Role || '').toLowerCase().includes('former candidate') && runningForDistrict ? `<div class="info-row"><span class="info-label">Ran for:</span><span class="info-value">${runningForDistrict}</span></div>` : ''}
                         ${districtInfo.length > 0 ? `<div class="info-row"><span class="info-label">Districts:</span><span class="info-value">${districtInfo.join(' | ')}</span></div>` : ''}
                         ${contact.Counties ? `<div class="info-row"><span class="info-label">Counties:</span><span class="info-value">${contact.Counties}</span></div>` : ''}
                         ${contact['Elected Opponent'] ? `<div class="info-row"><span class="info-label">Opponent:</span><span class="info-value">${contact['Elected Opponent']}</span></div>` : ''}
