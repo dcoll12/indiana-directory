@@ -922,6 +922,7 @@
                     </div>
                     
                     <div class="contact-info">
+                        ${(contact.Role || '').toLowerCase().includes('former candidate') && runningForDistrict ? `<div class="info-row"><span class="info-label">Ran for:</span><span class="info-value">${runningForDistrict}</span></div>` : ''}
                         ${districtInfo.length > 0 ? `<div class="info-row"><span class="info-label">Districts:</span><span class="info-value">${districtInfo.join(' | ')}</span></div>` : ''}
                         ${contact.Counties ? `<div class="info-row"><span class="info-label">Counties:</span><span class="info-value">${contact.Counties}</span></div>` : ''}
                         ${contact['Elected Opponent'] ? `<div class="info-row"><span class="info-label">Opponent:</span><span class="info-value">${contact['Elected Opponent']}</span></div>` : ''}
