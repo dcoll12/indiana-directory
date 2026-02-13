@@ -918,7 +918,7 @@
                         <div class="contact-name">${firstName} ${lastName}</div>
                         ${contact.Role ? `<div class="contact-role">${contact.Role}</div>` : ''}
                         ${contact.Title ? `<div class="contact-title">${contact.Title}</div>` : ''}
-                        ${runningForDistrict ? `<span class="badge">Running for: ${runningForDistrict}</span>` : ''}
+                        ${runningForDistrict ? `<span class="badge">${(contact.Role || '').toLowerCase().includes('former candidate') ? 'Ran for' : 'Running for'}: ${runningForDistrict}</span>` : ''}
                     </div>
                     
                     <div class="contact-info">
