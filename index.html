@@ -924,6 +924,7 @@
                         ${districtInfo.length > 0 ? `<div class="info-row"><span class="info-label">Districts:</span><span class="info-value">${districtInfo.join(' | ')}</span></div>` : ''}
                         ${contact.Counties ? `<div class="info-row"><span class="info-label">Counties:</span><span class="info-value">${contact.Counties}</span></div>` : ''}
                         ${contact['Elected Opponent'] ? `<div class="info-row"><span class="info-label">Opponent:</span><span class="info-value">${contact['Elected Opponent']}</span></div>` : ''}
+                        ${contact['Primary Opponent'] ? `<div class="info-row"><span class="info-label">Primary Opponent:</span><span class="info-value">${contact['Primary Opponent']}</span></div>` : ''}
                         ${contact['Home City'] ? `<div class="info-row"><span class="info-label">Location:</span><span class="info-value">${contact['Home City']}${contact['Home County'] ? ', ' + contact['Home County'] : ''}</span></div>` : ''}
                         ${contact.Occupation ? `<div class="info-row"><span class="info-label">Occupation:</span><span class="info-value">${contact.Occupation}</span></div>` : ''}
                         ${contact.Email ? `<div class="info-row"><span class="info-label">Email:</span><span class="info-value"><a href="mailto:${contact.Email}">${contact.Email}</a></span></div>` : ''}
@@ -994,7 +995,8 @@
                     (contact.Occupation && contact.Occupation.toLowerCase().includes(searchTerm)) ||
                     (contact['Home City'] && contact['Home City'].toLowerCase().includes(searchTerm)) ||
                     (contact.Counties && contact.Counties.toLowerCase().includes(searchTerm)) ||
-                    (contact['Elected Opponent'] && contact['Elected Opponent'].toLowerCase().includes(searchTerm));
+                    (contact['Elected Opponent'] && contact['Elected Opponent'].toLowerCase().includes(searchTerm)) ||
+                    (contact['Primary Opponent'] && contact['Primary Opponent'].toLowerCase().includes(searchTerm));
 
                 // Role filter - check if selected role is in the person's roles
                 const roleMatch = !roleFilter || 
