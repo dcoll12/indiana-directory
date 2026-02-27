@@ -931,9 +931,9 @@
 
             // Collect all district info for display
             const districtInfo = [];
-            if (contact['House District']) districtInfo.push(`House: ${contact['House District']}`);
-            if (contact['Senate District']) districtInfo.push(`Senate: ${contact['Senate District']}`);
-            if (contact['Congressional District']) districtInfo.push(`Congressional: ${contact['Congressional District']}`);
+            if (contact['House District']) districtInfo.push(contact['House District']);
+            if (contact['Senate District']) districtInfo.push(contact['Senate District']);
+            if (contact['Congressional District']) districtInfo.push(contact['Congressional District']);
 
             return `
                 <div class="contact-card">
