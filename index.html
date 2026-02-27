@@ -560,6 +560,27 @@
             resize: vertical;
         }
 
+        .radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            padding: 4px 0;
+        }
+
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 400;
+            color: #374151;
+            cursor: pointer;
+        }
+
+        .radio-group input[type="radio"] {
+            width: auto;
+            margin: 0;
+        }
+
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -605,7 +626,7 @@
             <p>Connect with candidates, volunteers, and committee members across Indiana</p>
             <div class="header-buttons">
                 <button class="header-btn" onclick="openSubmitModal()">📝 Submit Your Info</button>
-                <button class="header-btn secondary" onclick="window.open('https://docs.google.com/forms/d/e/1FAIpQLSfU8KkjPEUUT_AF-DERaV5lfP1leZsIoFOWyp5E2uPZcp7M4Q/viewform', '_blank')">✏️ Update/Correct Info</button>
+                <button class="header-btn secondary" onclick="openUpdateModal()">✏️ Update/Correct Info</button>
             </div>
         </div>
 
@@ -1109,6 +1130,10 @@
             document.getElementById('submitModal').style.display = 'block';
         }
 
+        function openUpdateModal() {
+            document.getElementById('updateModal').style.display = 'block';
+        }
+
 function closeModal(modalId) {
             document.getElementById(modalId).style.display = 'none';
         }
@@ -1133,7 +1158,18 @@ function closeModal(modalId) {
                     }, 1000);
                 });
             }
-            
+
+            const updateForm = document.getElementById('updateForm');
+            if (updateForm) {
+                updateForm.addEventListener('submit', function() {
+                    setTimeout(function() {
+                        alert('Thank you! Your update request has been submitted.');
+                        closeModal('updateModal');
+                        updateForm.reset();
+                    }, 1000);
+                });
+            }
+
         }, 100);
     </script>
 
@@ -1273,6 +1309,142 @@ function closeModal(modalId) {
         </div>
     </div>
 
+
+    <!-- Update Info Modal -->
+    <div id="updateModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="close" onclick="closeModal('updateModal')">&times;</span>
+                <h2>Update or Correct Your Information</h2>
+                <p>Request changes to your existing directory listing</p>
+            </div>
+            <div class="modal-body">
+                <div class="info-notice">
+                    ✏️ <strong>Note:</strong> Use this form to submit updates to your information in the organizational directory. All fields are optional — only fill in what you'd like to change.
+                </div>
+
+                <form id="updateForm" action="https://docs.google.com/forms/d/e/1FAIpQLSfU8KkjPEUUT_AF-DERaV5lfP1leZsIoFOWyp5E2uPZcp7M4Q/formResponse" method="POST" target="hidden_iframe">
+                    <div class="form-section">
+                        <h3>Personal Information</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Your Name (as it appears in directory)</label>
+                                <input type="text" name="entry.1462476584">
+                            </div>
+                            <div class="form-group">
+                                <label>Name Correction</label>
+                                <input type="text" name="entry.2053866991">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Type of Candidate <span style="color: #6b7280; font-weight: 400;">(if applicable)</span></label>
+                            <div class="radio-group">
+                                <label><input type="radio" name="entry.1075511133" value="Local"> Local</label>
+                                <label><input type="radio" name="entry.1075511133" value="House"> House</label>
+                                <label><input type="radio" name="entry.1075511133" value="Senate"> Senate</label>
+                                <label><input type="radio" name="entry.1075511133" value="Congress"> Congress</label>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Email Address</label>
+                                <input type="email" name="entry.595729290">
+                            </div>
+                            <div class="form-group">
+                                <label>Phone</label>
+                                <input type="tel" name="entry.1949522755">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Role & Position</h3>
+                        <div class="form-group">
+                            <label>Role</label>
+                            <select name="entry.548342954">
+                                <option value="">Select your role...</option>
+                                <option value="Candidate">Candidate</option>
+                                <option value="Volunteer - IRS">Volunteer - IRS</option>
+                                <option value="Steering Committee">Steering Committee</option>
+                                <option value="Advisory Committee">Advisory Committee</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Title</label>
+                                <input type="text" name="entry.648496279" placeholder="e.g., House, Senate">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Congressional District</label>
+                                <input type="text" name="entry.730243700" placeholder="e.g., CD 1, CD 5">
+                            </div>
+                            <div class="form-group">
+                                <label>House District</label>
+                                <input type="text" name="entry.315144444" placeholder="e.g., HD 24, HD 53">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Senate District</label>
+                                <input type="text" name="entry.1793890074" placeholder="e.g., SD 15, SD 22">
+                            </div>
+                            <div class="form-group">
+                                <label>Counties Covered <span style="color: #6b7280; font-weight: 400;">(if candidate)</span></label>
+                                <input type="text" name="entry.1681799478" placeholder="e.g., Allen, Marion">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Location & Background</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Home City</label>
+                                <input type="text" name="entry.1488104628">
+                            </div>
+                            <div class="form-group">
+                                <label>Home County</label>
+                                <input type="text" name="entry.1558598548">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Occupation</label>
+                            <input type="text" name="entry.1732323133">
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Online Presence</h3>
+                        <div class="form-group">
+                            <label>Website URL</label>
+                            <input type="url" name="entry.1449400127" placeholder="https://">
+                        </div>
+                        <div class="form-group">
+                            <label>Facebook URL</label>
+                            <input type="url" name="entry.1313256247" placeholder="https://facebook.com/...">
+                        </div>
+                        <div class="form-group">
+                            <label>Instagram URL</label>
+                            <input type="text" name="entry.899644463" placeholder="@yourusername">
+                        </div>
+                        <div class="form-group">
+                            <label>TikTok URL</label>
+                            <input type="text" name="entry.1212519326" placeholder="@yourusername">
+                        </div>
+                        <div class="form-group">
+                            <label>Other Links</label>
+                            <input type="text" placeholder="https://">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Submit Update Request</button>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <!-- Hidden iframe for form submission -->
     <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
