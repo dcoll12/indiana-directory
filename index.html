@@ -920,7 +920,7 @@
                         <div class="contact-name">${firstName} ${lastName}</div>
                         ${contact.Role ? `<div class="contact-role">${contact.Role}</div>` : ''}
                         ${contact.Title ? `<div class="contact-title">${contact.Title}</div>` : ''}
-                        ${runningForDistrict && !(contact.Role || '').toLowerCase().includes('former candidate') ? `<span class="badge">Running for: ${runningForDistrict}</span>` : ''}
+                        ${runningForDistrict && (contact.Role || '').toLowerCase().includes('candidate') && !(contact.Role || '').toLowerCase().includes('former candidate') ? `<span class="badge">Running for: ${runningForDistrict}</span>` : ''}
                     </div>
                     
                     <div class="contact-info">
