@@ -63,6 +63,8 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
         }
 
         .header-btn:hover {
@@ -625,8 +627,8 @@
             <h1>Indiana Rural Summit Directory</h1>
             <p>Connect with candidates, volunteers, and committee members across Indiana</p>
             <div class="header-buttons">
-                <button class="header-btn" onclick="openSubmitModal()">📝 Submit Your Info</button>
-                <button class="header-btn secondary" onclick="openUpdateModal()">✏️ Update/Correct Info</button>
+                <a class="header-btn" href="https://docs.google.com/forms/d/e/1FAIpQLSdB3WPT2o6AZ9gqiio0OPMzbyUiSAv6qm7Q2l1W3wVlOLK9zw/viewform?usp=header" target="_blank">📝 Submit Your Info</a>
+                <a class="header-btn secondary" href="https://docs.google.com/forms/d/e/1FAIpQLSfU8KkjPEUUT_AF-DERaV5lfP1leZsIoFOWyp5E2uPZcp7M4Q/viewform?usp=header" target="_blank">✏️ Update/Correct Info</a>
             </div>
         </div>
 
@@ -931,9 +933,9 @@
 
             // Collect all district info for display
             const districtInfo = [];
-            if (contact['House District']) districtInfo.push(`House: ${contact['House District']}`);
-            if (contact['Senate District']) districtInfo.push(`Senate: ${contact['Senate District']}`);
-            if (contact['Congressional District']) districtInfo.push(`Congressional: ${contact['Congressional District']}`);
+            if (contact['House District']) districtInfo.push(contact['House District']);
+            if (contact['Senate District']) districtInfo.push(contact['Senate District']);
+            if (contact['Congressional District']) districtInfo.push(contact['Congressional District']);
 
             return `
                 <div class="contact-card">
