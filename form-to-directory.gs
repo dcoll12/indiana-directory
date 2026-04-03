@@ -58,7 +58,42 @@ const FIELD_MAP = {
   'Primary Opponent':              'Primary Opponent',
 };
 
-// ── Main trigger function ─────────────────────────────────────────────────────
+/**
+ * Maps UPDATE form question titles to DIRECTORY tab column headers.
+ *
+ * Keys   = exact column header in the Update Form Responses sheet
+ * Values = exact column header in the DIRECTORY sheet
+ *
+ * "Your Name (as it appears in directory)" is used for lookup only.
+ * "Name Correction" will overwrite First Name / Last Name if provided.
+ */
+const UPDATE_FIELD_MAP = {
+  'Name Correction':              '_NAME_CORRECTION',  // special: splits into First/Last
+  'Email Address':                'Email',
+  'Phone':                        'Phone',
+  'Type of Candidate':            'Title',
+  'Role':                         'Role',
+  'Title':                        'Title',
+  'Congressional District':       'Congressional District',
+  'House District':               'House District',
+  'Senate District':              'Senate District',
+  'Counties Covered':             'Counties',
+  'Home City':                    'Home City',
+  'Home County':                  'Home County',
+  'Occupation':                   'Occupation',
+  'Website URL':                  'Website',
+  'Facebook URL':                 'Facebook',
+  'Instagram URL':                'Instagram',
+  'TikTok URL':                   'Other Social 1',
+  'Other Links':                  'Other Social 2',
+};
+
+// Sheet names for the form response tabs.
+// Adjust these to match the actual tab names in your spreadsheet.
+const NEW_RESPONSES_SHEET_NAME  = 'Form Responses 1';
+const UPDATE_RESPONSES_SHEET_NAME = 'Update Responses';
+
+// ── Main trigger function (new submissions) ──────────────────────────────────
 
 /**
  * Triggered automatically when a form is submitted.
@@ -68,6 +103,13 @@ const FIELD_MAP = {
  */
 function onFormSubmit(e) {
   try {
+    // Guard: only process events from the new-submission form responses sheet
+    const sourceSheet = e.range && e.range.getSheet();
+    if (sourceSheet && sourceSheet.getName() === UPDATE_RESPONSES_SHEET_NAME) {
+      console.log('onFormSubmit: ignoring event from update form.');
+      return;
+    }
+
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const directorySheet = ss.getSheetByName(DIRECTORY_SHEET_NAME);
 
@@ -106,6 +148,130 @@ function onFormSubmit(e) {
   } catch (err) {
     console.error('onFormSubmit error:', err.message);
     // Re-throw so Apps Script logs the full stack trace
+    throw err;
+  }
+}
+
+// ── Update trigger function ──────────────────────────────────────────────────
+
+/**
+ * Triggered automatically when the UPDATE form is submitted.
+ * Looks up the contact by first and last name, then overwrites
+ * only the fields that were filled in.
+ *
+ * HOW TO INSTALL (separate trigger):
+ *   1. Click "Triggers" (clock icon) in the Apps Script sidebar
+ *   2. Click "+ Add Trigger"
+ *   3. Choose function: onUpdateFormSubmit
+ *   4. Event source: From spreadsheet
+ *   5. Event type: On form submit
+ *   6. Click Save
+ *
+ * NOTE: If both the new-submission form and the update form are
+ * linked to this spreadsheet, Apps Script fires ALL "on form submit"
+ * triggers for every submission. Each handler checks which sheet the
+ * event came from and exits early if it's not the right one.
+ *
+ * @param {Object} e - The form submit event object
+ */
+function onUpdateFormSubmit(e) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const directorySheet = ss.getSheetByName(DIRECTORY_SHEET_NAME);
+
+    if (!directorySheet) {
+      throw new Error(`Sheet "${DIRECTORY_SHEET_NAME}" not found.`);
+    }
+
+    // Guard: only process events from the Update Responses sheet
+    const sourceSheet = e.range && e.range.getSheet();
+    if (sourceSheet && sourceSheet.getName() !== UPDATE_RESPONSES_SHEET_NAME) {
+      console.log('onUpdateFormSubmit: ignoring event from sheet "' +
+        (sourceSheet ? sourceSheet.getName() : 'unknown') + '"');
+      return;
+    }
+
+    const formValues = e.namedValues || {};
+
+    // ── 1. Extract the lookup name ──────────────────────────────────────
+    const lookupRaw = (formValues['Your Name (as it appears in directory)'] || [''])[0].trim();
+    if (!lookupRaw) {
+      console.log('onUpdateFormSubmit: no lookup name provided, skipping.');
+      return;
+    }
+
+    // Split lookup name into first and last
+    const nameParts = lookupRaw.split(/\s+/);
+    const lookupFirst = nameParts[0].toLowerCase();
+    const lookupLast = nameParts.slice(1).join(' ').toLowerCase();
+
+    // ── 2. Find the row in DIRECTORY that matches first + last name ─────
+    const directoryHeaders = directorySheet
+      .getRange(1, 1, 1, directorySheet.getLastColumn())
+      .getValues()[0]
+      .map(h => h.toString().trim());
+
+    const firstNameCol = directoryHeaders.indexOf('First Name');
+    const lastNameCol = directoryHeaders.indexOf('Last Name');
+
+    if (firstNameCol === -1 || lastNameCol === -1) {
+      throw new Error('DIRECTORY sheet must have "First Name" and "Last Name" columns.');
+    }
+
+    const dataRange = directorySheet.getRange(2, 1, directorySheet.getLastRow() - 1, directorySheet.getLastColumn());
+    const allData = dataRange.getValues();
+
+    let matchRow = -1; // 0-based index within allData
+    for (let i = 0; i < allData.length; i++) {
+      const rowFirst = allData[i][firstNameCol].toString().trim().toLowerCase();
+      const rowLast = allData[i][lastNameCol].toString().trim().toLowerCase();
+      if (rowFirst === lookupFirst && rowLast === lookupLast) {
+        matchRow = i;
+        break;
+      }
+    }
+
+    if (matchRow === -1) {
+      console.log('onUpdateFormSubmit: no matching contact found for "' + lookupRaw + '".');
+      return;
+    }
+
+    const sheetRow = matchRow + 2; // +1 for header, +1 for 1-based indexing
+
+    // ── 3. Apply non-empty updates ──────────────────────────────────────
+
+    // Handle name correction first (splits into First Name / Last Name)
+    const nameCorrection = (formValues['Name Correction'] || [''])[0].trim();
+    if (nameCorrection) {
+      const corrParts = nameCorrection.split(/\s+/);
+      const newFirst = corrParts[0];
+      const newLast = corrParts.slice(1).join(' ');
+      directorySheet.getRange(sheetRow, firstNameCol + 1).setValue(newFirst);
+      if (newLast) {
+        directorySheet.getRange(sheetRow, lastNameCol + 1).setValue(newLast);
+      }
+    }
+
+    // Apply all other mapped fields
+    Object.keys(UPDATE_FIELD_MAP).forEach(formQuestion => {
+      const dirCol = UPDATE_FIELD_MAP[formQuestion];
+      if (dirCol === '_NAME_CORRECTION') return; // already handled above
+
+      const value = (formValues[formQuestion] || [''])[0].trim();
+      if (!value) return; // skip empty fields
+
+      const colIndex = directoryHeaders.indexOf(dirCol);
+      if (colIndex === -1) {
+        console.log('onUpdateFormSubmit: column "' + dirCol + '" not found in DIRECTORY, skipping.');
+        return;
+      }
+
+      directorySheet.getRange(sheetRow, colIndex + 1).setValue(value);
+    });
+
+    console.log('onUpdateFormSubmit: updated contact "' + lookupRaw + '" at row ' + sheetRow + '.');
+  } catch (err) {
+    console.error('onUpdateFormSubmit error:', err.message);
     throw err;
   }
 }
