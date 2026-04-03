@@ -59,32 +59,10 @@ const FIELD_MAP = {
 };
 
 /**
- * Maps UPDATE form question titles to DIRECTORY tab column headers.
- *
- * Keys   = exact column header in the Update Form Responses sheet
- * Values = exact column header in the DIRECTORY sheet
- *
- * "Your Name (as it appears in directory)" is used for lookup only.
- * "Name Correction" will overwrite First Name / Last Name if provided.
+ * The UPDATE form now uses the same fields as the new-contact form.
+ * Reuse FIELD_MAP for updates; First Name + Last Name are used for lookup.
  */
-const UPDATE_FIELD_MAP = {
-  'Name Correction':              '_NAME_CORRECTION',  // special: splits into First/Last
-  'Phone':                        'Phone',
-  'Role':                         'Role',
-  'Title':                        'Title',
-  'Congressional District':       'Congressional District',
-  'House District':               'House District',
-  'Senate District':              'Senate District',
-  'Counties Covered':             'Counties',
-  'Home City':                    'Home City',
-  'Home County':                  'Home County',
-  'Occupation':                   'Occupation',
-  'Website URL':                  'Website',
-  'Facebook URL':                 'Facebook',
-  'Instagram URL':                'Instagram',
-  'TikTok URL':                   'Tiktok',
-  'Other Links':                  'Other Social 1',
-};
+const UPDATE_FIELD_MAP = FIELD_MAP;
 
 // Sheet names for the form response tabs.
 // Adjust these to match the actual tab names in your spreadsheet.
@@ -191,82 +169,67 @@ function onUpdateFormSubmit(e) {
 
     const formValues = e.namedValues || {};
 
-    // ── 1. Extract the lookup email ─────────────────────────────────────
-    const lookupEmail = (formValues['Email Address'] || [''])[0].trim().toLowerCase();
-    if (!lookupEmail) {
-      console.log('onUpdateFormSubmit: no email provided, skipping.');
+    // ── 1. Extract the lookup name ──────────────────────────────────────
+    const lookupFirst = (formValues['First Name'] || [''])[0].trim().toLowerCase();
+    const lookupLast  = (formValues['Last Name']  || [''])[0].trim().toLowerCase();
+    if (!lookupFirst || !lookupLast) {
+      console.log('onUpdateFormSubmit: first or last name missing, skipping.');
       return;
     }
 
-    // ── 2. Find the row in DIRECTORY that matches by email ──────────────
+    // ── 2. Find the row in DIRECTORY that matches first + last name ─────
     const directoryHeaders = directorySheet
       .getRange(1, 1, 1, directorySheet.getLastColumn())
       .getValues()[0]
       .map(h => h.toString().trim());
 
-    const emailCol = directoryHeaders.indexOf('Email');
-    const email2Col = directoryHeaders.indexOf('Email2');
+    const firstNameCol = directoryHeaders.indexOf('First Name');
+    const lastNameCol  = directoryHeaders.indexOf('Last Name');
 
-    if (emailCol === -1) {
-      throw new Error('DIRECTORY sheet must have an "Email" column.');
+    if (firstNameCol === -1 || lastNameCol === -1) {
+      throw new Error('DIRECTORY sheet must have "First Name" and "Last Name" columns.');
     }
 
     const dataRange = directorySheet.getRange(2, 1, directorySheet.getLastRow() - 1, directorySheet.getLastColumn());
     const allData = dataRange.getValues();
 
-    let matchRow = -1; // 0-based index within allData
+    let matchRow = -1;
     for (let i = 0; i < allData.length; i++) {
-      const rowEmail = allData[i][emailCol].toString().trim().toLowerCase();
-      const rowEmail2 = email2Col !== -1 ? allData[i][email2Col].toString().trim().toLowerCase() : '';
-      if (rowEmail === lookupEmail || rowEmail2 === lookupEmail) {
+      const rowFirst = allData[i][firstNameCol].toString().trim().toLowerCase();
+      const rowLast  = allData[i][lastNameCol].toString().trim().toLowerCase();
+      if (rowFirst === lookupFirst && rowLast === lookupLast) {
         matchRow = i;
         break;
       }
     }
 
     if (matchRow === -1) {
-      console.log('onUpdateFormSubmit: no matching contact found for email "' + lookupEmail + '".');
+      console.log('onUpdateFormSubmit: no match for "' + lookupFirst + ' ' + lookupLast + '".');
       return;
     }
 
     const sheetRow = matchRow + 2; // +1 for header, +1 for 1-based indexing
 
-    // ── 3. Apply non-empty updates ──────────────────────────────────────
-
-    // Handle name correction first (splits into First Name / Last Name)
-    const nameCorrection = (formValues['Name Correction'] || [''])[0].trim();
-    if (nameCorrection) {
-      const corrParts = nameCorrection.split(/\s+/);
-      const newFirst = corrParts[0];
-      const newLast = corrParts.slice(1).join(' ');
-      const firstNameCol = directoryHeaders.indexOf('First Name');
-      const lastNameCol = directoryHeaders.indexOf('Last Name');
-      if (firstNameCol !== -1) {
-        directorySheet.getRange(sheetRow, firstNameCol + 1).setValue(newFirst);
-      }
-      if (newLast && lastNameCol !== -1) {
-        directorySheet.getRange(sheetRow, lastNameCol + 1).setValue(newLast);
-      }
-    }
-
-    // Apply all other mapped fields
+    // ── 3. Apply non-empty updates (skip First/Last Name used for lookup)
     Object.keys(UPDATE_FIELD_MAP).forEach(formQuestion => {
       const dirCol = UPDATE_FIELD_MAP[formQuestion];
-      if (dirCol === '_NAME_CORRECTION') return; // already handled above
+
+      // Skip name fields — they were used for lookup, not update
+      if (dirCol === 'First Name' || dirCol === 'Last Name') return;
 
       const value = (formValues[formQuestion] || [''])[0].trim();
       if (!value) return; // skip empty fields
 
       const colIndex = directoryHeaders.indexOf(dirCol);
       if (colIndex === -1) {
-        console.log('onUpdateFormSubmit: column "' + dirCol + '" not found in DIRECTORY, skipping.');
+        console.log('onUpdateFormSubmit: column "' + dirCol + '" not found, skipping.');
         return;
       }
 
       directorySheet.getRange(sheetRow, colIndex + 1).setValue(value);
     });
 
-    console.log('onUpdateFormSubmit: updated contact with email "' + lookupEmail + '" at row ' + sheetRow + '.');
+    console.log('onUpdateFormSubmit: updated "' + lookupFirst + ' ' + lookupLast + '" at row ' + sheetRow + '.');
   } catch (err) {
     console.error('onUpdateFormSubmit error:', err.message);
     throw err;
