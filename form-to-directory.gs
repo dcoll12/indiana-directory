@@ -70,7 +70,6 @@ const FIELD_MAP = {
 const UPDATE_FIELD_MAP = {
   'Name Correction':              '_NAME_CORRECTION',  // special: splits into First/Last
   'Phone':                        'Phone',
-  'Type of Candidate':            'Filed (candidate)',
   'Role':                         'Role',
   'Title':                        'Title',
   'Congressional District':       'Congressional District',
