@@ -155,7 +155,8 @@
         .directory-grid {
             padding: 40px;
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            grid-auto-rows: auto;
             gap: 25px;
         }
 
@@ -163,10 +164,11 @@
             background: white;
             border: 2px solid #e2e8f0;
             border-radius: 12px;
-            padding: 25px;
+            padding: 0;
             transition: all 0.3s;
             position: relative;
-            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
         .contact-card:hover {
@@ -186,11 +188,52 @@
         }
 
         .contact-header {
-            margin-bottom: 15px;
+            margin-bottom: 0;
+            padding: 16px 20px 12px;
+            text-align: center;
+        }
+
+        .contact-photo-area {
+            background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 24px 0 16px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .contact-photo {
+            width: 96px;
+            height: 96px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 3px solid white;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+        }
+
+        .contact-photo-placeholder {
+            width: 96px;
+            height: 96px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 700;
+            color: white;
+            border: 3px solid white;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+        }
+
+        .contact-header-text {
+            flex: 1;
+            min-width: 0;
+            text-align: center;
         }
 
         .contact-name {
-            font-size: 1.4rem;
+            font-size: 1.15rem;
             font-weight: 700;
             color: #1e293b;
             margin-bottom: 5px;
@@ -210,16 +253,20 @@
         }
 
         .contact-info {
-            margin-top: 15px;
-            padding-top: 15px;
+            margin-top: 0;
+            padding: 0 20px 10px;
             border-top: 1px solid #e2e8f0;
         }
 
         .info-row {
             display: flex;
             align-items: flex-start;
-            margin-bottom: 10px;
+            margin-bottom: 9px;
             font-size: 0.9rem;
+        }
+
+        .info-row:first-child {
+            margin-top: 12px;
         }
 
         .info-label {
@@ -249,8 +296,9 @@
         .social-links {
             display: flex;
             gap: 10px;
-            margin-top: 15px;
-            padding-top: 15px;
+            flex-wrap: wrap;
+            margin-top: auto;
+            padding: 12px 20px 18px;
             border-top: 1px solid #e2e8f0;
         }
 
@@ -309,7 +357,12 @@
 
             .directory-grid {
                 grid-template-columns: 1fr;
+                grid-auto-rows: auto;
                 padding: 20px;
+            }
+
+            .directory-list {
+                padding: 0 20px 20px 20px;
             }
 
             .stats {
@@ -337,32 +390,35 @@
         .view-toggle {
             display: flex;
             gap: 5px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            padding: 4px;
         }
 
         .view-btn {
             display: flex;
             align-items: center;
-            gap: 5px;
-            padding: 8px 16px;
-            background: white;
+            gap: 6px;
+            padding: 9px 20px;
+            background: transparent;
             color: #64748b;
-            border: 2px solid #e2e8f0;
+            border: none;
             border-radius: 6px;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
         }
 
         .view-btn:hover {
-            border-color: #3b82f6;
             color: #3b82f6;
+            background: rgba(59,130,246,0.08);
         }
 
         .view-btn.active {
             background: #3b82f6;
             color: white;
-            border-color: #3b82f6;
+            box-shadow: 0 2px 6px rgba(59,130,246,0.3);
         }
 
         /* List View Styles */
@@ -374,39 +430,46 @@
             display: grid;
             grid-template-columns: 2fr 1fr 1.5fr 1fr 200px;
             gap: 20px;
-            padding: 15px 20px;
-            background: #f8fafc;
-            border-bottom: 2px solid #e2e8f0;
+            padding: 12px 20px;
+            background: #f1f5f9;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px 8px 0 0;
+            border-bottom: none;
             font-weight: 700;
             color: #475569;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            position: sticky;
-            top: 0;
-            z-index: 10;
+            letter-spacing: 0.8px;
+            margin-top: 8px;
         }
 
         .list-item {
             background: white;
             border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 15px;
+            border-top: none;
+            padding: 16px 20px;
             display: grid;
             grid-template-columns: 2fr 1fr 1.5fr 1fr 200px;
             gap: 20px;
             align-items: center;
+            min-height: 72px;
             transition: all 0.2s;
         }
 
+        .list-item:last-child {
+            border-radius: 0 0 8px 8px;
+        }
+
         .list-item:hover {
+            background: #f8faff;
             border-color: #3b82f6;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            z-index: 1;
+            position: relative;
+            box-shadow: 0 2px 10px rgba(59,130,246,0.12);
         }
 
         .list-name {
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 700;
             color: #1e293b;
         }
@@ -414,7 +477,8 @@
         .list-role {
             color: #3b82f6;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            margin-top: 2px;
         }
 
         .list-location {
@@ -429,37 +493,53 @@
 
         .list-actions {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             justify-content: flex-end;
+            flex-wrap: wrap;
         }
 
         .list-actions a {
-            padding: 6px 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
             background: #eff6ff;
             color: #1e40af;
             text-decoration: none;
-            border-radius: 4px;
-            font-size: 0.85rem;
-            font-weight: 600;
+            border-radius: 6px;
+            font-size: 1rem;
             transition: all 0.2s;
         }
 
         .list-actions a:hover {
             background: #3b82f6;
-            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 6px rgba(59,130,246,0.3);
         }
 
         @media (max-width: 1200px) {
-            .list-header,
-            .list-item {
-                grid-template-columns: 1fr;
-                gap: 10px;
-            }
-            
             .list-header {
                 display: none;
             }
-            
+
+            .list-item {
+                grid-template-columns: 1fr;
+                gap: 8px;
+                border: 2px solid #e2e8f0;
+                border-radius: 8px;
+                margin-bottom: 10px;
+                min-height: unset;
+            }
+
+            .list-item:last-child {
+                border-radius: 8px;
+            }
+
+            .list-item:hover {
+                border-color: #3b82f6;
+            }
+
             .list-actions {
                 justify-content: flex-start;
             }
@@ -657,7 +737,7 @@
                 <span class="stats-item" style="margin-left: 20px;">Showing: <span id="visibleCount">0</span></span>
             </div>
             <div class="view-toggle">
-                <button class="view-btn active" id="gridViewBtn" onclick="switchView('grid')">
+                <button class="view-btn" id="gridViewBtn" onclick="switchView('grid')">
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
                         <rect x="1" y="1" width="6" height="6" rx="1"/>
                         <rect x="9" y="1" width="6" height="6" rx="1"/>
@@ -666,7 +746,7 @@
                     </svg>
                     Grid
                 </button>
-                <button class="view-btn" id="listViewBtn" onclick="switchView('list')">
+                <button class="view-btn active" id="listViewBtn" onclick="switchView('list')">
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
                         <rect x="1" y="2" width="14" height="2" rx="1"/>
                         <rect x="1" y="7" width="14" height="2" rx="1"/>
@@ -677,7 +757,7 @@
             </div>
         </div>
 
-        <div class="directory-grid" id="directoryGrid">
+        <div class="directory-list" id="directoryGrid">
             <!-- Cards will be inserted here by JavaScript -->
         </div>
     </div>
@@ -689,6 +769,23 @@
         
         let directoryData = [];
         let filteredData = [];
+        let directoryHeaders = [];
+
+        // Convert a Google Drive share link to a direct image URL
+        function convertDriveUrl(url) {
+            if (!url) return '';
+            // https://drive.google.com/file/d/FILE_ID/view?...
+            const fileMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+            if (fileMatch) {
+                return `https://drive.google.com/thumbnail?id=${fileMatch[1]}&sz=w400`;
+            }
+            // https://drive.google.com/open?id=FILE_ID  or  ?id=FILE_ID
+            const openMatch = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+            if (openMatch) {
+                return `https://drive.google.com/thumbnail?id=${openMatch[1]}&sz=w400`;
+            }
+            return url;
+        }
 
         // Show loading indicator
         function showLoading() {
@@ -767,6 +864,7 @@
             
             // Parse header row
             const headers = parseCSVLine(lines[0]);
+            directoryHeaders = headers;
             console.log('Headers found:', headers.length, headers);
             
             // Parse data rows
@@ -938,13 +1036,31 @@
             if (contact['Senate District']) districtInfo.push(contact['Senate District']);
             if (contact['Congressional District']) districtInfo.push(contact['Congressional District']);
 
+            // Build photo/avatar HTML
+            // Check Photo URL, Photo, or the first column (portrait link) as fallback
+            const firstColVal = directoryHeaders.length > 0 ? (contact[directoryHeaders[0]] || '') : '';
+            const rawPhotoUrl = contact['Photo URL'] || contact['Photo'] || (firstColVal.startsWith('http') ? firstColVal : '');
+            const photoUrl = convertDriveUrl(rawPhotoUrl);
+            const initials = (firstName.charAt(0) + lastName.charAt(0)).toUpperCase();
+            const photoHtml = photoUrl
+                ? `<img class="contact-photo" src="${photoUrl}" alt="${firstName} ${lastName}"
+                       onerror="this.onerror=null;this.style.display='none';var n=this.nextElementSibling;if(n)n.style.display='flex';"
+                       onload="if(!this.naturalWidth||!this.naturalHeight){this.style.display='none';var n=this.nextElementSibling;if(n)n.style.display='flex';}">
+                   <div class="contact-photo-placeholder" style="display:none;">${initials}</div>`
+                : `<div class="contact-photo-placeholder">${initials}</div>`;
+
             return `
                 <div class="contact-card">
+                    <div class="contact-photo-area">
+                        ${photoHtml}
+                    </div>
                     <div class="contact-header">
-                        <div class="contact-name">${firstName} ${lastName}</div>
-                        ${contact.Role ? `<div class="contact-role">${contact.Role}</div>` : ''}
-                        ${contact.Title ? `<div class="contact-title">${contact.Title}</div>` : ''}
-                        ${runningForDistrict && (contact.Role || '').toLowerCase().includes('candidate') && !(contact.Role || '').toLowerCase().includes('former candidate') ? `<span class="badge">Running for: ${runningForDistrict}</span>` : ''}
+                        <div class="contact-header-text">
+                            <div class="contact-name">${firstName} ${lastName}</div>
+                            ${contact.Role ? `<div class="contact-role">${contact.Role}</div>` : ''}
+                            ${contact.Title ? `<div class="contact-title">${contact.Title}</div>` : ''}
+                            ${runningForDistrict && (contact.Role || '').toLowerCase().includes('candidate') && !(contact.Role || '').toLowerCase().includes('former candidate') ? `<span class="badge">Running for: ${runningForDistrict}</span>` : ''}
+                        </div>
                     </div>
                     
                     <div class="contact-info">
@@ -1058,7 +1174,7 @@
         }
 
         // View switching
-        let currentView = 'grid';
+        let currentView = 'list';
         
         function switchView(view) {
             currentView = view;
