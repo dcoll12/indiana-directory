@@ -69,7 +69,6 @@ const FIELD_MAP = {
  */
 const UPDATE_FIELD_MAP = {
   'Name Correction':              '_NAME_CORRECTION',  // special: splits into First/Last
-  'Email Address':                'Email',
   'Phone':                        'Phone',
   'Type of Candidate':            'Title',
   'Role':                         'Role',
@@ -193,29 +192,23 @@ function onUpdateFormSubmit(e) {
 
     const formValues = e.namedValues || {};
 
-    // ── 1. Extract the lookup name ──────────────────────────────────────
-    const lookupRaw = (formValues['Your Name (as it appears in directory)'] || [''])[0].trim();
-    if (!lookupRaw) {
-      console.log('onUpdateFormSubmit: no lookup name provided, skipping.');
+    // ── 1. Extract the lookup email ─────────────────────────────────────
+    const lookupEmail = (formValues['Email Address'] || [''])[0].trim().toLowerCase();
+    if (!lookupEmail) {
+      console.log('onUpdateFormSubmit: no email provided, skipping.');
       return;
     }
 
-    // Split lookup name into first and last
-    const nameParts = lookupRaw.split(/\s+/);
-    const lookupFirst = nameParts[0].toLowerCase();
-    const lookupLast = nameParts.slice(1).join(' ').toLowerCase();
-
-    // ── 2. Find the row in DIRECTORY that matches first + last name ─────
+    // ── 2. Find the row in DIRECTORY that matches by email ──────────────
     const directoryHeaders = directorySheet
       .getRange(1, 1, 1, directorySheet.getLastColumn())
       .getValues()[0]
       .map(h => h.toString().trim());
 
-    const firstNameCol = directoryHeaders.indexOf('First Name');
-    const lastNameCol = directoryHeaders.indexOf('Last Name');
+    const emailCol = directoryHeaders.indexOf('Email');
 
-    if (firstNameCol === -1 || lastNameCol === -1) {
-      throw new Error('DIRECTORY sheet must have "First Name" and "Last Name" columns.');
+    if (emailCol === -1) {
+      throw new Error('DIRECTORY sheet must have an "Email" column.');
     }
 
     const dataRange = directorySheet.getRange(2, 1, directorySheet.getLastRow() - 1, directorySheet.getLastColumn());
@@ -223,16 +216,15 @@ function onUpdateFormSubmit(e) {
 
     let matchRow = -1; // 0-based index within allData
     for (let i = 0; i < allData.length; i++) {
-      const rowFirst = allData[i][firstNameCol].toString().trim().toLowerCase();
-      const rowLast = allData[i][lastNameCol].toString().trim().toLowerCase();
-      if (rowFirst === lookupFirst && rowLast === lookupLast) {
+      const rowEmail = allData[i][emailCol].toString().trim().toLowerCase();
+      if (rowEmail === lookupEmail) {
         matchRow = i;
         break;
       }
     }
 
     if (matchRow === -1) {
-      console.log('onUpdateFormSubmit: no matching contact found for "' + lookupRaw + '".');
+      console.log('onUpdateFormSubmit: no matching contact found for email "' + lookupEmail + '".');
       return;
     }
 
@@ -246,8 +238,12 @@ function onUpdateFormSubmit(e) {
       const corrParts = nameCorrection.split(/\s+/);
       const newFirst = corrParts[0];
       const newLast = corrParts.slice(1).join(' ');
-      directorySheet.getRange(sheetRow, firstNameCol + 1).setValue(newFirst);
-      if (newLast) {
+      const firstNameCol = directoryHeaders.indexOf('First Name');
+      const lastNameCol = directoryHeaders.indexOf('Last Name');
+      if (firstNameCol !== -1) {
+        directorySheet.getRange(sheetRow, firstNameCol + 1).setValue(newFirst);
+      }
+      if (newLast && lastNameCol !== -1) {
         directorySheet.getRange(sheetRow, lastNameCol + 1).setValue(newLast);
       }
     }
@@ -269,7 +265,7 @@ function onUpdateFormSubmit(e) {
       directorySheet.getRange(sheetRow, colIndex + 1).setValue(value);
     });
 
-    console.log('onUpdateFormSubmit: updated contact "' + lookupRaw + '" at row ' + sheetRow + '.');
+    console.log('onUpdateFormSubmit: updated contact with email "' + lookupEmail + '" at row ' + sheetRow + '.');
   } catch (err) {
     console.error('onUpdateFormSubmit error:', err.message);
     throw err;
