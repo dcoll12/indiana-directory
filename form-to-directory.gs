@@ -70,7 +70,7 @@ const FIELD_MAP = {
 const UPDATE_FIELD_MAP = {
   'Name Correction':              '_NAME_CORRECTION',  // special: splits into First/Last
   'Phone':                        'Phone',
-  'Type of Candidate':            'Title',
+  'Type of Candidate':            'Filed (candidate)',
   'Role':                         'Role',
   'Title':                        'Title',
   'Congressional District':       'Congressional District',
@@ -83,8 +83,8 @@ const UPDATE_FIELD_MAP = {
   'Website URL':                  'Website',
   'Facebook URL':                 'Facebook',
   'Instagram URL':                'Instagram',
-  'TikTok URL':                   'Other Social 1',
-  'Other Links':                  'Other Social 2',
+  'TikTok URL':                   'Tiktok',
+  'Other Links':                  'Other Social 1',
 };
 
 // Sheet names for the form response tabs.
@@ -206,6 +206,7 @@ function onUpdateFormSubmit(e) {
       .map(h => h.toString().trim());
 
     const emailCol = directoryHeaders.indexOf('Email');
+    const email2Col = directoryHeaders.indexOf('Email2');
 
     if (emailCol === -1) {
       throw new Error('DIRECTORY sheet must have an "Email" column.');
@@ -217,7 +218,8 @@ function onUpdateFormSubmit(e) {
     let matchRow = -1; // 0-based index within allData
     for (let i = 0; i < allData.length; i++) {
       const rowEmail = allData[i][emailCol].toString().trim().toLowerCase();
-      if (rowEmail === lookupEmail) {
+      const rowEmail2 = email2Col !== -1 ? allData[i][email2Col].toString().trim().toLowerCase() : '';
+      if (rowEmail === lookupEmail || rowEmail2 === lookupEmail) {
         matchRow = i;
         break;
       }
