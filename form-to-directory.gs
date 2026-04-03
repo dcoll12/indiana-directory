@@ -59,10 +59,34 @@ const FIELD_MAP = {
 };
 
 /**
- * The UPDATE form now uses the same fields as the new-contact form.
- * Reuse FIELD_MAP for updates; First Name + Last Name are used for lookup.
+ * Maps UPDATE form question titles (Update Responses sheet column headers)
+ * to DIRECTORY tab column headers.
+ *
+ * Keys   = exact column header in the Update Responses sheet
+ * Values = exact column header in the DIRECTORY sheet
  */
-const UPDATE_FIELD_MAP = FIELD_MAP;
+const UPDATE_FIELD_MAP = {
+  'First Name':                          'First Name',
+  'Last Name':                           'Last Name',
+  'Type of Candidate':                   'Filed (candidate)',
+  'Phone':                               'Phone',
+  'Email':                               'Email',
+  'Alternative email':                   'Email2',
+  'Role':                                'Role',
+  'How would you describe your role?':   'Notes',
+  'Title (e.g., Senate Minority Leader)':'Title',
+  'Congressional District':              'Congressional District',
+  'House District':                      'House District',
+  'Senate District':                     'Senate District',
+  'Counties Covered':                    'Counties',
+  'Home City':                           'Home City',
+  'Home County':                         'Home County',
+  'Occupation':                          'Occupation',
+  'Website URL':                         'Website',
+  'Facebook URL':                        'Facebook',
+  'Instagram Handle':                    'Instagram',
+  'Upload portrait':                     'Photo',
+};
 
 // Sheet names for the form response tabs.
 // Adjust these to match the actual tab names in your spreadsheet.
