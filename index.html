@@ -429,48 +429,101 @@
 
         .list-header {
             display: grid;
-            grid-template-columns: 2fr 1fr 1.5fr 1fr 200px;
-            gap: 20px;
-            padding: 12px 20px;
-            background: #f1f5f9;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px 8px 0 0;
+            grid-template-columns: 100px 1.5fr 140px 140px 1.2fr;
+            gap: 0;
+            padding: 0;
+            background: #1a1a2e;
+            border: 2px solid #1a1a2e;
+            border-radius: 0;
             border-bottom: none;
             font-weight: 700;
-            color: #475569;
-            font-size: 0.8rem;
+            color: #ffffff;
+            font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 0.8px;
             margin-top: 8px;
         }
 
+        .list-header > div {
+            padding: 10px 12px;
+            border-right: 1px solid rgba(255,255,255,0.15);
+            display: flex;
+            align-items: center;
+        }
+
+        .list-header > div:last-child {
+            border-right: none;
+        }
+
         .list-item {
             background: white;
-            border: 2px solid #e2e8f0;
+            border: 1px solid #d1d5db;
             border-top: none;
-            padding: 16px 20px;
+            padding: 0;
             display: grid;
-            grid-template-columns: 2fr 1fr 1.5fr 1fr 200px;
-            gap: 20px;
+            grid-template-columns: 100px 1.5fr 140px 140px 1.2fr;
+            gap: 0;
             align-items: center;
-            min-height: 72px;
-            transition: all 0.2s;
+            min-height: 90px;
+            transition: background 0.2s;
+        }
+
+        .list-item:nth-child(even) {
+            background: #f9fafb;
         }
 
         .list-item:last-child {
-            border-radius: 0 0 8px 8px;
+            border-radius: 0;
         }
 
         .list-item:hover {
-            background: #f8faff;
-            border-color: #3b82f6;
+            background: #eef2ff;
             z-index: 1;
             position: relative;
-            box-shadow: 0 2px 10px rgba(59,130,246,0.12);
+        }
+
+        .list-item > div {
+            padding: 12px;
+            border-right: 1px solid #e5e7eb;
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
+
+        .list-item > div:last-child {
+            border-right: none;
+        }
+
+        /* District badge cell */
+        .list-district-cell {
+            justify-content: center;
+        }
+
+        .list-district-badge {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 3px solid #3b82f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.8rem;
+            color: #1e293b;
+            text-align: center;
+            line-height: 1.1;
+            background: white;
+        }
+
+        /* Name cell */
+        .list-name-cell {
+            flex-direction: column;
+            align-items: flex-start !important;
+            justify-content: center;
         }
 
         .list-name {
-            font-size: 1rem;
+            font-size: 1.05rem;
             font-weight: 700;
             color: #1e293b;
         }
@@ -478,45 +531,124 @@
         .list-role {
             color: #3b82f6;
             font-weight: 600;
-            font-size: 0.85rem;
-            margin-top: 2px;
+            font-size: 0.8rem;
+            margin-top: 3px;
         }
 
-        .list-location {
-            color: #64748b;
-            font-size: 0.9rem;
-        }
-
-        .list-district {
-            color: #64748b;
-            font-size: 0.9rem;
-        }
-
-        .list-actions {
-            display: flex;
+        /* Website / Donate buttons */
+        .list-buttons-cell {
+            flex-direction: column;
+            justify-content: center;
             gap: 6px;
-            justify-content: flex-end;
-            flex-wrap: wrap;
         }
 
-        .list-actions a {
+        .list-website-btn,
+        .list-donate-btn {
+            display: inline-block;
+            padding: 6px 16px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-decoration: none;
+            text-align: center;
+            border-radius: 4px;
+            transition: all 0.2s;
+            letter-spacing: 0.3px;
+            min-width: 100px;
+        }
+
+        .list-website-btn {
+            background: #7c3aed;
+            color: white;
+        }
+
+        .list-website-btn:hover {
+            background: #6d28d9;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(124,58,237,0.4);
+        }
+
+        .list-donate-btn {
+            background: #b91c1c;
+            color: white;
+        }
+
+        .list-donate-btn:hover {
+            background: #991b1b;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(185,28,28,0.4);
+        }
+
+        /* Social media icons */
+        .list-social-cell {
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .list-social-icon {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 34px;
-            height: 34px;
-            background: #eff6ff;
-            color: #1e40af;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
             text-decoration: none;
-            border-radius: 6px;
-            font-size: 1rem;
             transition: all 0.2s;
+            border: 2px solid;
         }
 
-        .list-actions a:hover {
-            background: #3b82f6;
+        .list-social-icon:hover {
             transform: translateY(-2px);
-            box-shadow: 0 2px 6px rgba(59,130,246,0.3);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+        }
+
+        .list-social-icon svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .social-facebook {
+            background: #1877F2;
+            border-color: #1877F2;
+            color: white;
+        }
+
+        .social-instagram {
+            background: #E4405F;
+            border-color: #E4405F;
+            color: white;
+        }
+
+        .social-twitter {
+            background: #1DA1F2;
+            border-color: #1DA1F2;
+            color: white;
+        }
+
+        .social-other {
+            background: #6b7280;
+            border-color: #6b7280;
+            color: white;
+        }
+
+        /* Opponent cell */
+        .list-opponent-cell {
+            flex-direction: column;
+            align-items: flex-start !important;
+            justify-content: center;
+            gap: 2px;
+        }
+
+        .list-opponent {
+            font-size: 0.9rem;
+            color: #1e293b;
+        }
+
+        .list-opponent-label {
+            font-size: 0.7rem;
+            color: #9ca3af;
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.5px;
         }
 
         @media (max-width: 1200px) {
@@ -526,11 +658,21 @@
 
             .list-item {
                 grid-template-columns: 1fr;
-                gap: 8px;
+                gap: 0;
                 border: 2px solid #e2e8f0;
                 border-radius: 8px;
                 margin-bottom: 10px;
                 min-height: unset;
+            }
+
+            .list-item > div {
+                border-right: none;
+                border-bottom: 1px solid #f1f5f9;
+                height: auto;
+            }
+
+            .list-item > div:last-child {
+                border-bottom: none;
             }
 
             .list-item:last-child {
@@ -541,8 +683,22 @@
                 border-color: #3b82f6;
             }
 
-            .list-actions {
+            .list-district-cell {
                 justify-content: flex-start;
+            }
+
+            .list-district-badge {
+                width: 50px;
+                height: 50px;
+                font-size: 0.7rem;
+            }
+
+            .list-social-cell {
+                justify-content: flex-start;
+            }
+
+            .list-buttons-cell {
+                flex-direction: row;
             }
         }
 
@@ -1109,11 +1265,11 @@
                 if (currentView === 'list') {
                     const header = `
                         <div class="list-header">
-                            <div>Name & Role</div>
-                            <div>Location</div>
-                            <div>District</div>
-                            <div>Occupation</div>
-                            <div>Contact</div>
+                            <div>Dist</div>
+                            <div>Candidate</div>
+                            <div>Website/Donate</div>
+                            <div>Social Media</div>
+                            <div>Opponent</div>
                         </div>
                     `;
                     grid.innerHTML = header + filteredData.map(contact => createListItem(contact)).join('');
@@ -1187,47 +1343,99 @@
         function createListItem(contact) {
             const firstName = contact['First Name'] || '';
             const lastName = contact['Last Name'] || '';
-            const email = contact.Email || '';
-            const phone = contact.Phone || '';
-            
-            // Collect all districts
-            const districts = [];
-            if (contact.District) districts.push(contact.District);
-            if (contact['Congressional District']) districts.push(contact['Congressional District']);
-            if (contact['House District']) districts.push(contact['House District']);
-            if (contact['Senate District']) districts.push(contact['Senate District']);
-            const districtText = districts.length > 0 ? districts.join(', ') : '—';
-            
-            // Check for social media
+
+            // Determine district badge text from Title
+            const title = (contact.Title || '').toLowerCase();
+            let districtBadge = '';
+            if (title.includes('house') && contact['House District']) {
+                districtBadge = 'HD-' + contact['House District'].replace(/\D/g, '');
+            } else if (title.includes('senate') && contact['Senate District']) {
+                districtBadge = 'SD-' + contact['Senate District'].replace(/\D/g, '');
+            } else if (title.includes('congress') && contact['Congressional District']) {
+                districtBadge = 'CD-' + contact['Congressional District'].replace(/\D/g, '');
+            } else if (contact['House District']) {
+                districtBadge = 'HD-' + contact['House District'].replace(/\D/g, '');
+            } else if (contact['Senate District']) {
+                districtBadge = 'SD-' + contact['Senate District'].replace(/\D/g, '');
+            } else if (contact['Congressional District']) {
+                districtBadge = 'CD-' + contact['Congressional District'].replace(/\D/g, '');
+            } else if (contact.District) {
+                districtBadge = contact.District;
+            }
+
+            // Check for social media & web links
             const hasWebsite = contact.Website && contact.Website !== '?' && contact.Website.startsWith('http');
             const hasFacebook = contact.Facebook && contact.Facebook !== '?' && contact.Facebook !== 'No Campaign page?' && contact.Facebook.startsWith('http');
             const hasInstagram = contact.Instagram && contact.Instagram !== '?' && contact.Instagram !== '';
             const hasOtherSocial1 = contact['Other Social 1'] && contact['Other Social 1'].trim() !== '' && contact['Other Social 1'].startsWith('http');
             const hasOtherSocial2 = contact['Other Social 2'] && contact['Other Social 2'].trim() !== '' && contact['Other Social 2'].startsWith('http');
 
+            // Detect if "other social" is Twitter/X
+            const isTwitter = (url) => url && (url.includes('twitter.com') || url.includes('x.com'));
+
+            // SVG icons
+            const fbSvg = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>`;
+            const igSvg = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>`;
+            const twSvg = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/></svg>`;
+            const linkSvg = `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg>`;
+
+            // Build social icons
+            let socialHtml = '';
+            if (hasFacebook) {
+                socialHtml += `<a href="${contact.Facebook}" target="_blank" title="Facebook" class="list-social-icon social-facebook">${fbSvg}</a>`;
+            }
+            if (hasInstagram) {
+                const igUrl = contact.Instagram.startsWith('http') ? contact.Instagram : 'https://instagram.com/' + contact.Instagram.replace('@', '');
+                socialHtml += `<a href="${igUrl}" target="_blank" title="Instagram" class="list-social-icon social-instagram">${igSvg}</a>`;
+            }
+            if (hasOtherSocial1) {
+                if (isTwitter(contact['Other Social 1'])) {
+                    socialHtml += `<a href="${contact['Other Social 1']}" target="_blank" title="Twitter" class="list-social-icon social-twitter">${twSvg}</a>`;
+                } else {
+                    socialHtml += `<a href="${contact['Other Social 1']}" target="_blank" title="Social" class="list-social-icon social-other">${linkSvg}</a>`;
+                }
+            }
+            if (hasOtherSocial2) {
+                if (isTwitter(contact['Other Social 2'])) {
+                    socialHtml += `<a href="${contact['Other Social 2']}" target="_blank" title="Twitter" class="list-social-icon social-twitter">${twSvg}</a>`;
+                } else {
+                    socialHtml += `<a href="${contact['Other Social 2']}" target="_blank" title="Social" class="list-social-icon social-other">${linkSvg}</a>`;
+                }
+            }
+
+            // Build buttons
+            let buttonsHtml = '';
+            if (hasWebsite) {
+                buttonsHtml += `<a href="${contact.Website}" target="_blank" class="list-website-btn">Website</a>`;
+                buttonsHtml += `<a href="${contact.Website}" target="_blank" class="list-donate-btn">DONATE</a>`;
+            }
+
+            // Opponent info
+            let opponentHtml = '';
+            if (contact['Elected Opponent']) {
+                opponentHtml += `<div class="list-opponent">${contact['Elected Opponent']}</div>`;
+            }
+            if (contact['Primary Opponent']) {
+                opponentHtml += `<div class="list-opponent-label">Primary</div><div class="list-opponent">${contact['Primary Opponent']}</div>`;
+            }
+
             return `
                 <div class="list-item">
-                    <div>
+                    <div class="list-district-cell">
+                        ${districtBadge ? `<div class="list-district-badge">${districtBadge}</div>` : ''}
+                    </div>
+                    <div class="list-name-cell">
                         <div class="list-name">${firstName} ${lastName}</div>
                         ${contact.Role ? `<div class="list-role">${contact.Role}</div>` : ''}
                     </div>
-                    <div class="list-location">
-                        ${contact['Home City'] ? contact['Home City'] + (contact['Home County'] ? ', ' + contact['Home County'] : '') : '—'}
+                    <div class="list-buttons-cell">
+                        ${buttonsHtml}
                     </div>
-                    <div class="list-district">
-                        ${districtText}
+                    <div class="list-social-cell">
+                        ${socialHtml}
                     </div>
-                    <div class="list-location">
-                        ${contact.Occupation || '—'}
-                    </div>
-                    <div class="list-actions">
-                        ${email ? `<a href="mailto:${email}" title="Email">📧</a>` : ''}
-                        ${phone ? `<a href="tel:${phone}" title="Call">📞</a>` : ''}
-                        ${hasWebsite ? `<a href="${contact.Website}" target="_blank" title="Website">🌐</a>` : ''}
-                        ${hasFacebook ? `<a href="${contact.Facebook}" target="_blank" title="Facebook">📘</a>` : ''}
-                        ${hasInstagram ? `<a href="https://instagram.com/${contact.Instagram.replace('@', '')}" target="_blank" title="Instagram">📸</a>` : ''}
-                        ${hasOtherSocial1 ? `<a href="${contact['Other Social 1']}" target="_blank" title="Other Social">🔗</a>` : ''}
-                        ${hasOtherSocial2 ? `<a href="${contact['Other Social 2']}" target="_blank" title="Other Social">🔗</a>` : ''}
+                    <div class="list-opponent-cell">
+                        ${opponentHtml}
                     </div>
                 </div>
             `;
