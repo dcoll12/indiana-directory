@@ -772,20 +772,82 @@
         let filteredData = [];
         let directoryHeaders = [];
 
-        // Convert a Google Drive share link to a direct image URL
-        function convertDriveUrl(url) {
+        // Extract a Google Drive file ID from any of the common share-link formats
+        function getDriveFileId(url) {
             if (!url) return '';
             // https://drive.google.com/file/d/FILE_ID/view?...
-            const fileMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-            if (fileMatch) {
-                return `https://drive.google.com/thumbnail?id=${fileMatch[1]}&sz=w400`;
+            let m = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+            if (m) return m[1];
+            // https://drive.google.com/open?id=FILE_ID  or  ...uc?id=FILE_ID  or  ?id=FILE_ID
+            m = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+            if (m) return m[1];
+            // https://drive.google.com/thumbnail?id=... already handled above; also bare /d/FILE_ID
+            m = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+            if (m) return m[1];
+            // https://lh3.googleusercontent.com/d/FILE_ID=...
+            m = url.match(/googleusercontent\.com\/d\/([a-zA-Z0-9_-]+)/);
+            if (m) return m[1];
+            return '';
+        }
+
+        // Build an ordered list of image URLs to try for a given raw value.
+        // Google Drive endpoints are individually flaky (rate limiting / referrer
+        // checks), so we try more than one before giving up and showing initials.
+        function buildPhotoCandidates(url) {
+            if (!url) return [];
+            const id = getDriveFileId(url);
+            if (id) {
+                return [
+                    `https://lh3.googleusercontent.com/d/${id}=w400`,
+                    `https://drive.google.com/thumbnail?id=${id}&sz=w400`
+                ];
             }
-            // https://drive.google.com/open?id=FILE_ID  or  ?id=FILE_ID
-            const openMatch = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-            if (openMatch) {
-                return `https://drive.google.com/thumbnail?id=${openMatch[1]}&sz=w400`;
+            // Not a recognizable Drive link — use the URL as-is (e.g. a direct image host)
+            return [url];
+        }
+
+        // Backwards-compatible single-URL helper (returns the preferred candidate)
+        function convertDriveUrl(url) {
+            const candidates = buildPhotoCandidates(url);
+            return candidates.length ? candidates[0] : '';
+        }
+
+        // <img> error handler: advance to the next candidate URL, or fall back to initials
+        function photoFallback(img) {
+            let list;
+            try { list = JSON.parse(img.getAttribute('data-fallbacks') || '[]'); }
+            catch (e) { list = []; }
+            const idx = parseInt(img.getAttribute('data-idx') || '0', 10) + 1;
+            if (list && idx < list.length) {
+                img.setAttribute('data-idx', String(idx));
+                img.src = list[idx];
+            } else {
+                img.onerror = null;
+                img.style.display = 'none';
+                const n = img.nextElementSibling;
+                if (n) n.style.display = 'flex';
             }
-            return url;
+        }
+
+        // <img> load handler: some broken images still fire onload with 0 dimensions
+        function photoOnLoad(img) {
+            if (!img.naturalWidth || !img.naturalHeight) {
+                photoFallback(img);
+            }
+        }
+
+        // Normalize a user-entered link into a working absolute URL.
+        // People often paste "www.facebook.com/..." or "facebook.com/..." with no
+        // protocol; without "https://" the browser treats it as a relative link
+        // and the button breaks. Returns '' for empty/placeholder values.
+        function normalizeUrl(url) {
+            if (!url) return '';
+            const trimmed = String(url).trim();
+            if (trimmed === '' || trimmed === '?' || trimmed === 'No Campaign page?') return '';
+            if (/^https?:\/\//i.test(trimmed)) return trimmed;
+            // Looks like a bare domain/path (e.g. www.facebook.com/foo) — assume https
+            if (/^[\w-]+(\.[\w-]+)+/.test(trimmed)) return 'https://' + trimmed;
+            return trimmed;
         }
 
         // Show loading indicator
@@ -1011,16 +1073,20 @@
         function createCard(contact) {
             const firstName = contact['First Name'] || '';
             const lastName = contact['Last Name'] || '';
-            const hasWebsite = contact.Website && contact.Website !== '?' && contact.Website.startsWith('http');
-            const hasFacebook = contact.Facebook && contact.Facebook !== '?' && contact.Facebook !== 'No Campaign page?' && contact.Facebook.startsWith('http');
+            const websiteUrl = normalizeUrl(contact.Website);
+            const facebookUrl = normalizeUrl(contact.Facebook);
+            const otherSocial1Url = normalizeUrl(contact['Other Social 1']);
+            const otherSocial2Url = normalizeUrl(contact['Other Social 2']);
+            const hasWebsite = !!websiteUrl;
+            const hasFacebook = !!facebookUrl;
             const hasInstagram = contact.Instagram && contact.Instagram !== '?' && contact.Instagram !== '';
-            const hasOtherSocial1 = contact['Other Social 1'] && contact['Other Social 1'].trim() !== '' && contact['Other Social 1'].startsWith('http');
-            const hasOtherSocial2 = contact['Other Social 2'] && contact['Other Social 2'].trim() !== '' && contact['Other Social 2'].startsWith('http');
+            const hasOtherSocial1 = !!otherSocial1Url;
+            const hasOtherSocial2 = !!otherSocial2Url;
 
             // Determine which district they're running for based on Title
             let runningForDistrict = '';
             const title = (contact.Title || '').toLowerCase();
-            
+
             if (title.includes('house')) {
                 runningForDistrict = contact['House District'] || contact.District || '';
             } else if (title.includes('senate')) {
@@ -1041,12 +1107,14 @@
             // Check Photo URL, Photo, or the first column (portrait link) as fallback
             const firstColVal = directoryHeaders.length > 0 ? (contact[directoryHeaders[0]] || '') : '';
             const rawPhotoUrl = contact['Photo URL'] || contact['Photo'] || (firstColVal.startsWith('http') ? firstColVal : '');
-            const photoUrl = convertDriveUrl(rawPhotoUrl);
+            const photoCandidates = buildPhotoCandidates(rawPhotoUrl);
             const initials = (firstName.charAt(0) + lastName.charAt(0)).toUpperCase();
-            const photoHtml = photoUrl
-                ? `<img class="contact-photo" src="${photoUrl}" alt="${firstName} ${lastName}"
-                       onerror="this.onerror=null;this.style.display='none';var n=this.nextElementSibling;if(n)n.style.display='flex';"
-                       onload="if(!this.naturalWidth||!this.naturalHeight){this.style.display='none';var n=this.nextElementSibling;if(n)n.style.display='flex';}">
+            const photoHtml = photoCandidates.length
+                ? `<img class="contact-photo" src="${photoCandidates[0]}" alt="${firstName} ${lastName}"
+                       referrerpolicy="no-referrer" loading="lazy"
+                       data-fallbacks='${JSON.stringify(photoCandidates).replace(/'/g, '&#39;')}' data-idx="0"
+                       onerror="photoFallback(this)"
+                       onload="photoOnLoad(this)">
                    <div class="contact-photo-placeholder" style="display:none;">${initials}</div>`
                 : `<div class="contact-photo-placeholder">${initials}</div>`;
 
@@ -1077,11 +1145,11 @@
                     </div>
                     
                     <div class="social-links">
-                        ${hasWebsite ? `<a href="${contact.Website}" target="_blank" class="social-btn">🌐 Website</a>` : ''}
-                        ${hasFacebook ? `<a href="${contact.Facebook}" target="_blank" class="social-btn">📘 Facebook</a>` : ''}
+                        ${hasWebsite ? `<a href="${websiteUrl}" target="_blank" class="social-btn">🌐 Website</a>` : ''}
+                        ${hasFacebook ? `<a href="${facebookUrl}" target="_blank" class="social-btn">📘 Facebook</a>` : ''}
                         ${hasInstagram ? `<a href="https://instagram.com/${contact.Instagram.replace('@', '')}" target="_blank" class="social-btn">📸 Instagram</a>` : ''}
-                        ${hasOtherSocial1 ? `<a href="${contact['Other Social 1']}" target="_blank" class="social-btn">🔗 ${new URL(contact['Other Social 1']).hostname.replace('www.', '')}</a>` : ''}
-                        ${hasOtherSocial2 ? `<a href="${contact['Other Social 2']}" target="_blank" class="social-btn">🔗 ${new URL(contact['Other Social 2']).hostname.replace('www.', '')}</a>` : ''}
+                        ${hasOtherSocial1 ? `<a href="${otherSocial1Url}" target="_blank" class="social-btn">🔗 ${new URL(otherSocial1Url).hostname.replace('www.', '')}</a>` : ''}
+                        ${hasOtherSocial2 ? `<a href="${otherSocial2Url}" target="_blank" class="social-btn">🔗 ${new URL(otherSocial2Url).hostname.replace('www.', '')}</a>` : ''}
                     </div>
                 </div>
             `;
@@ -1199,11 +1267,15 @@
             const districtText = districts.length > 0 ? districts.join(', ') : '—';
             
             // Check for social media
-            const hasWebsite = contact.Website && contact.Website !== '?' && contact.Website.startsWith('http');
-            const hasFacebook = contact.Facebook && contact.Facebook !== '?' && contact.Facebook !== 'No Campaign page?' && contact.Facebook.startsWith('http');
+            const websiteUrl = normalizeUrl(contact.Website);
+            const facebookUrl = normalizeUrl(contact.Facebook);
+            const otherSocial1Url = normalizeUrl(contact['Other Social 1']);
+            const otherSocial2Url = normalizeUrl(contact['Other Social 2']);
+            const hasWebsite = !!websiteUrl;
+            const hasFacebook = !!facebookUrl;
             const hasInstagram = contact.Instagram && contact.Instagram !== '?' && contact.Instagram !== '';
-            const hasOtherSocial1 = contact['Other Social 1'] && contact['Other Social 1'].trim() !== '' && contact['Other Social 1'].startsWith('http');
-            const hasOtherSocial2 = contact['Other Social 2'] && contact['Other Social 2'].trim() !== '' && contact['Other Social 2'].startsWith('http');
+            const hasOtherSocial1 = !!otherSocial1Url;
+            const hasOtherSocial2 = !!otherSocial2Url;
 
             return `
                 <div class="list-item">
@@ -1223,11 +1295,11 @@
                     <div class="list-actions">
                         ${email ? `<a href="mailto:${email}" title="Email">📧</a>` : ''}
                         ${phone ? `<a href="tel:${phone}" title="Call">📞</a>` : ''}
-                        ${hasWebsite ? `<a href="${contact.Website}" target="_blank" title="Website">🌐</a>` : ''}
-                        ${hasFacebook ? `<a href="${contact.Facebook}" target="_blank" title="Facebook">📘</a>` : ''}
+                        ${hasWebsite ? `<a href="${websiteUrl}" target="_blank" title="Website">🌐</a>` : ''}
+                        ${hasFacebook ? `<a href="${facebookUrl}" target="_blank" title="Facebook">📘</a>` : ''}
                         ${hasInstagram ? `<a href="https://instagram.com/${contact.Instagram.replace('@', '')}" target="_blank" title="Instagram">📸</a>` : ''}
-                        ${hasOtherSocial1 ? `<a href="${contact['Other Social 1']}" target="_blank" title="Other Social">🔗</a>` : ''}
-                        ${hasOtherSocial2 ? `<a href="${contact['Other Social 2']}" target="_blank" title="Other Social">🔗</a>` : ''}
+                        ${hasOtherSocial1 ? `<a href="${otherSocial1Url}" target="_blank" title="Other Social">🔗</a>` : ''}
+                        ${hasOtherSocial2 ? `<a href="${otherSocial2Url}" target="_blank" title="Other Social">🔗</a>` : ''}
                     </div>
                 </div>
             `;
