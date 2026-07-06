@@ -772,20 +772,68 @@
         let filteredData = [];
         let directoryHeaders = [];
 
-        // Convert a Google Drive share link to a direct image URL
-        function convertDriveUrl(url) {
+        // Extract a Google Drive file ID from any of the common share-link formats
+        function getDriveFileId(url) {
             if (!url) return '';
             // https://drive.google.com/file/d/FILE_ID/view?...
-            const fileMatch = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-            if (fileMatch) {
-                return `https://drive.google.com/thumbnail?id=${fileMatch[1]}&sz=w400`;
+            let m = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+            if (m) return m[1];
+            // https://drive.google.com/open?id=FILE_ID  or  ...uc?id=FILE_ID  or  ?id=FILE_ID
+            m = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+            if (m) return m[1];
+            // https://drive.google.com/thumbnail?id=... already handled above; also bare /d/FILE_ID
+            m = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+            if (m) return m[1];
+            // https://lh3.googleusercontent.com/d/FILE_ID=...
+            m = url.match(/googleusercontent\.com\/d\/([a-zA-Z0-9_-]+)/);
+            if (m) return m[1];
+            return '';
+        }
+
+        // Build an ordered list of image URLs to try for a given raw value.
+        // Google Drive endpoints are individually flaky (rate limiting / referrer
+        // checks), so we try more than one before giving up and showing initials.
+        function buildPhotoCandidates(url) {
+            if (!url) return [];
+            const id = getDriveFileId(url);
+            if (id) {
+                return [
+                    `https://lh3.googleusercontent.com/d/${id}=w400`,
+                    `https://drive.google.com/thumbnail?id=${id}&sz=w400`
+                ];
             }
-            // https://drive.google.com/open?id=FILE_ID  or  ?id=FILE_ID
-            const openMatch = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-            if (openMatch) {
-                return `https://drive.google.com/thumbnail?id=${openMatch[1]}&sz=w400`;
+            // Not a recognizable Drive link — use the URL as-is (e.g. a direct image host)
+            return [url];
+        }
+
+        // Backwards-compatible single-URL helper (returns the preferred candidate)
+        function convertDriveUrl(url) {
+            const candidates = buildPhotoCandidates(url);
+            return candidates.length ? candidates[0] : '';
+        }
+
+        // <img> error handler: advance to the next candidate URL, or fall back to initials
+        function photoFallback(img) {
+            let list;
+            try { list = JSON.parse(img.getAttribute('data-fallbacks') || '[]'); }
+            catch (e) { list = []; }
+            const idx = parseInt(img.getAttribute('data-idx') || '0', 10) + 1;
+            if (list && idx < list.length) {
+                img.setAttribute('data-idx', String(idx));
+                img.src = list[idx];
+            } else {
+                img.onerror = null;
+                img.style.display = 'none';
+                const n = img.nextElementSibling;
+                if (n) n.style.display = 'flex';
             }
-            return url;
+        }
+
+        // <img> load handler: some broken images still fire onload with 0 dimensions
+        function photoOnLoad(img) {
+            if (!img.naturalWidth || !img.naturalHeight) {
+                photoFallback(img);
+            }
         }
 
         // Show loading indicator
@@ -1041,12 +1089,14 @@
             // Check Photo URL, Photo, or the first column (portrait link) as fallback
             const firstColVal = directoryHeaders.length > 0 ? (contact[directoryHeaders[0]] || '') : '';
             const rawPhotoUrl = contact['Photo URL'] || contact['Photo'] || (firstColVal.startsWith('http') ? firstColVal : '');
-            const photoUrl = convertDriveUrl(rawPhotoUrl);
+            const photoCandidates = buildPhotoCandidates(rawPhotoUrl);
             const initials = (firstName.charAt(0) + lastName.charAt(0)).toUpperCase();
-            const photoHtml = photoUrl
-                ? `<img class="contact-photo" src="${photoUrl}" alt="${firstName} ${lastName}"
-                       onerror="this.onerror=null;this.style.display='none';var n=this.nextElementSibling;if(n)n.style.display='flex';"
-                       onload="if(!this.naturalWidth||!this.naturalHeight){this.style.display='none';var n=this.nextElementSibling;if(n)n.style.display='flex';}">
+            const photoHtml = photoCandidates.length
+                ? `<img class="contact-photo" src="${photoCandidates[0]}" alt="${firstName} ${lastName}"
+                       referrerpolicy="no-referrer" loading="lazy"
+                       data-fallbacks='${JSON.stringify(photoCandidates).replace(/'/g, '&#39;')}' data-idx="0"
+                       onerror="photoFallback(this)"
+                       onload="photoOnLoad(this)">
                    <div class="contact-photo-placeholder" style="display:none;">${initials}</div>`
                 : `<div class="contact-photo-placeholder">${initials}</div>`;
 
