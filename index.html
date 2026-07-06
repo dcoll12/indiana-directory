@@ -797,9 +797,12 @@
             if (!url) return [];
             const id = getDriveFileId(url);
             if (id) {
+                // A public Drive file renders from any of these; a Restricted file
+                // renders from none of them (Google returns 403 regardless).
                 return [
+                    `https://drive.google.com/thumbnail?id=${id}&sz=w400`,
                     `https://lh3.googleusercontent.com/d/${id}=w400`,
-                    `https://drive.google.com/thumbnail?id=${id}&sz=w400`
+                    `https://drive.usercontent.google.com/download?id=${id}&export=view&authuser=0`
                 ];
             }
             // Not a recognizable Drive link — use the URL as-is (e.g. a direct image host)
