@@ -54,6 +54,7 @@ const FIELD_MAP = {
   'Congressional District':                'Congressional District',
   'Alternative email':                     'Email2',
   'How would you describe your role?':     'Notes',
+  'If Statewide, which office?':           'Candidate Level',
   'Year(s) ran/running?':                  'Year Ran',
   'If Local, which office did you run for?': 'Local Office Ran For',
   'Upload portrait':                       'Photo',
@@ -87,6 +88,7 @@ const UPDATE_FIELD_MAP = {
   'Facebook URL':                        'Facebook',
   'Instagram Handle':                    'Instagram',
   'Upload portrait':                     'Photo',
+  'If Statewide, which office?':         'Candidate Level',
   'Year(s) ran/running?':                'Year Ran',
   'If Local, which office did you run for?': 'Local Office Ran For',
 };
@@ -131,17 +133,17 @@ function onFormSubmit(e) {
 
     // Build a new row aligned to the DIRECTORY column order
     const newRow = directoryHeaders.map(directoryCol => {
-      // Find the form question that maps to this directory column
-      const formQuestion = Object.keys(FIELD_MAP).find(
-        q => FIELD_MAP[q] === directoryCol
-      );
-
-      if (!formQuestion) return ''; // No mapping defined for this column
-
-      const answers = formValues[formQuestion];
-      if (!answers || answers.length === 0) return '';
-
-      return answers[0].trim(); // Google Forms wraps each answer in an array
+      // Several form questions can feed one directory column (e.g. Type of
+      // Candidate and "If Statewide, which office?" both go to Candidate Level).
+      // Use the first non-empty answer.
+      const questions = Object.keys(FIELD_MAP).filter(q => FIELD_MAP[q] === directoryCol);
+      for (const q of questions) {
+        const answers = formValues[q];
+        if (answers && answers.length && answers[0].toString().trim()) {
+          return answers[0].trim(); // Google Forms wraps each answer in an array
+        }
+      }
+      return '';
     });
 
     // Append the mapped row to the DIRECTORY sheet
