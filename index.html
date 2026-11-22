@@ -1081,7 +1081,7 @@
                 list.forEach(v => {
                     const option = document.createElement('option');
                     option.value = v;
-                    option.textContent = v;
+                    option.textContent = v.replace(/\s*\(any level\)/gi, '');
                     sel.appendChild(option);
                 });
             });
@@ -1185,7 +1185,7 @@
                         <div class="contact-header-text">
                             <div class="contact-name">${esc(firstName)} ${esc(lastName)}</div>
                             ${contact.Role ? `<div class="contact-role">${esc(contact.Role)}</div>` : ''}
-                            ${contact['Political Role'] ? `<div class="contact-title">${esc(contact['Political Role'])}</div>` : ''}
+                            ${contact['Political Role'] ? `<div class="contact-title">${esc(contact['Political Role'].replace(/\s*\(any level\)/gi, ''))}</div>` : ''}
                             ${contact.Title ? `<div class="contact-title">${esc(contact.Title)}</div>` : ''}
                             ${badgeHtml}
                         </div>
