@@ -34,28 +34,29 @@ const DIRECTORY_SHEET_NAME = 'DIRECTORY';
  * Update these if your form question wording differs.
  */
 const FIELD_MAP = {
-  // Form question title          : Directory column header
-  'First Name':                    'First Name',
-  'Last Name':                     'Last Name',
-  'Email':                         'Email',
-  'Phone':                         'Phone',
-  'Role':                          'Role',
-  'Title':                         'Title',
-  'District':                      'District',
-  'Congressional District':        'Congressional District',
-  'House District':                'House District',
-  'Senate District':               'Senate District',
-  'Counties':                      'Counties',
-  'Home City':                     'Home City',
-  'Home County':                   'Home County',
-  'Occupation':                    'Occupation',
-  'Website':                       'Website',
-  'Facebook URL':                  'Facebook',
-  'Instagram Handle':              'Instagram',
-  'Other Social 1':                'Other Social 1',
-  'Other Social 2':                'Other Social 2',
-  'Elected Opponent':              'Elected Opponent',
-  'Primary Opponent':              'Primary Opponent',
+  // Form question title                  : Directory column header
+  'First Name':                            'First Name',
+  'Last Name':                             'Last Name',
+  'Email':                                 'Email',
+  'Phone':                                 'Phone',
+  'Role':                                  'Role',
+  'Title (e.g., Senate Minority Leader)':  'Title',
+  'Type of Candidate':                     'Candidate Level',
+  'Counties Covered':                      'Counties',
+  'Home City':                             'Home City',
+  'Home County':                           'Home County',
+  'Occupation':                            'Occupation',
+  'Website URL':                           'Website',
+  'Facebook URL':                          'Facebook',
+  'Instagram Handle':                      'Instagram',
+  'House District':                        'House District',
+  'Senate District':                       'Senate District',
+  'Congressional District':                'Congressional District',
+  'Alternative email':                     'Email2',
+  'How would you describe your role?':     'Notes',
+  'Year(s) ran/running?':                  'Year Ran',
+  'If Local, which office did you run for?': 'Local Office Ran For',
+  'Upload portrait':                       'Photo',
 };
 
 /**
@@ -68,7 +69,7 @@ const FIELD_MAP = {
 const UPDATE_FIELD_MAP = {
   'First Name':                          'First Name',
   'Last Name':                           'Last Name',
-  'Type of Candidate':                   'Filed (candidate)',
+  'Type of Candidate':                   'Candidate Level',
   'Phone':                               'Phone',
   'Email':                               'Email',
   'Alternative email':                   'Email2',
@@ -86,11 +87,13 @@ const UPDATE_FIELD_MAP = {
   'Facebook URL':                        'Facebook',
   'Instagram Handle':                    'Instagram',
   'Upload portrait':                     'Photo',
+  'Year(s) ran/running?':                'Year Ran',
+  'If Local, which office did you run for?': 'Local Office Ran For',
 };
 
 // Sheet names for the form response tabs.
 // Adjust these to match the actual tab names in your spreadsheet.
-const NEW_RESPONSES_SHEET_NAME  = 'Form Responses 1';
+const NEW_RESPONSES_SHEET_NAME  = 'New Submission Request';
 const UPDATE_RESPONSES_SHEET_NAME = 'Update Responses';
 
 // ── Main trigger function (new submissions) ──────────────────────────────────

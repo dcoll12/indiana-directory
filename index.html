@@ -722,6 +722,12 @@
                 <select id="roleFilter">
                     <option value="">All Roles</option>
                 </select>
+                <select id="politicalRoleFilter">
+                    <option value="">All Political Roles</option>
+                </select>
+                <select id="resultFilter">
+                    <option value="">All 2026 Results</option>
+                </select>
                 <select id="districtFilter">
                     <option value="">All Districts</option>
                 </select>
@@ -850,6 +856,14 @@
             return trimmed;
         }
 
+        // Build a TikTok link from a handle (@name) or URL
+        function tiktokLink(value) {
+            const v = (value || '').trim();
+            if (!v || v === '?') return '';
+            if (/^@?[\w.]+$/.test(v)) return 'https://www.tiktok.com/@' + v.replace('@', '');
+            return normalizeUrl(v);
+        }
+
         // Show loading indicator
         function showLoading() {
             const grid = document.getElementById('directoryGrid');
@@ -917,83 +931,101 @@
             }
         }
 
-        // Improved CSV parser that handles quoted fields properly
+        // CSV parser: handles quoted fields, escaped quotes, and line breaks inside cells
+        function parseCSVRows(csv) {
+            const rows = [];
+            let row = [];
+            let cell = '';
+            let inQuotes = false;
+            for (let i = 0; i < csv.length; i++) {
+                const ch = csv[i];
+                if (inQuotes) {
+                    if (ch === '"') {
+                        if (csv[i + 1] === '"') { cell += '"'; i++; }
+                        else inQuotes = false;
+                    } else {
+                        cell += ch;
+                    }
+                } else if (ch === '"') {
+                    inQuotes = true;
+                } else if (ch === ',') {
+                    row.push(cell.trim());
+                    cell = '';
+                } else if (ch === '\n' || ch === '\r') {
+                    if (ch === '\r' && csv[i + 1] === '\n') i++;
+                    row.push(cell.trim());
+                    rows.push(row);
+                    row = [];
+                    cell = '';
+                } else {
+                    cell += ch;
+                }
+            }
+            if (cell !== '' || row.length) {
+                row.push(cell.trim());
+                rows.push(row);
+            }
+            return rows;
+        }
+
         function parseCSV(csv) {
-            const lines = csv.trim().split('\n');
-            if (lines.length < 2) {
-                console.error('CSV has less than 2 lines');
+            const rows = parseCSVRows(csv.replace(/^\uFEFF/, ''));
+            if (rows.length < 2) {
+                console.error('CSV has less than 2 rows');
                 return [];
             }
-            
-            // Parse header row
-            const headers = parseCSVLine(lines[0]);
+
+            const headers = rows[0].map(h => h.trim());
             directoryHeaders = headers;
-            console.log('Headers found:', headers.length, headers);
-            
-            // Parse data rows
+
             const data = [];
-            for (let i = 1; i < lines.length; i++) {
-                const line = lines[i].trim();
-                if (!line) continue;
-                
-                const values = parseCSVLine(line);
-                if (values.length === 0) continue;
-                
+            for (let i = 1; i < rows.length; i++) {
+                const values = rows[i];
                 const row = {};
                 headers.forEach((header, index) => {
-                    row[header] = values[index] || '';
+                    if (header) row[header] = values[index] || '';
                 });
-                
-                // Check if row has meaningful data (not all empty)
-                const hasData = Object.values(row).some(val => val && val.trim());
-                if (hasData) {
+                // Keep rows that have a name or any other data
+                if (Object.values(row).some(val => val && val.trim())) {
                     data.push(row);
                 }
             }
-            
-            console.log('Parsed contacts:', data.length);
-            if (data.length > 0) {
-                console.log('First contact:', data[0]);
-            }
-            
             return data;
         }
 
-        // Parse a single CSV line handling quotes properly
-        function parseCSVLine(line) {
-            const result = [];
-            let current = '';
-            let inQuotes = false;
-            
-            for (let i = 0; i < line.length; i++) {
-                const char = line[i];
-                const nextChar = line[i + 1];
-                
-                if (char === '"') {
-                    if (inQuotes && nextChar === '"') {
-                        // Escaped quote
-                        current += '"';
-                        i++; // Skip next quote
-                    } else {
-                        // Toggle quote state
-                        inQuotes = !inQuotes;
-                    }
-                } else if (char === ',' && !inQuotes) {
-                    // Field separator
-                    result.push(current.trim());
-                    current = '';
-                } else {
-                    current += char;
-                }
-            }
-            
-            // Add last field
-            result.push(current.trim());
-            
-            return result;
+        // Split a comma-separated cell ("House, Local") into trimmed, non-empty parts
+        function splitList(value) {
+            return value ? String(value).split(',').map(v => v.trim()).filter(Boolean) : [];
         }
 
+        // Escape text before inserting it into HTML
+        function esc(value) {
+            return String(value == null ? '' : value)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
 
+        // Candidate status helpers (columns: Candidate Status, 2026 General Result)
+        function isCandidate(c) {
+            return splitList(c['Political Role']).includes('Candidate (any level)') ||
+                   ['Former candidate', 'Elected official'].includes(c['Candidate Status']);
+        }
+        function resultOutcome(c) {
+            const r = (c['2026 General Result'] || '').toLowerCase();
+            if (r.startsWith('won')) return 'Won';
+            if (r.startsWith('lost')) return 'Lost';
+            return '';
+        }
+
+        // District(s) the person ran for, based on Candidate Level
+        function getRunDistrict(c) {
+            const levels = splitList(c['Candidate Level']);
+            const parts = [];
+            if (levels.includes('House') && c['House District']) parts.push(c['House District']);
+            if (levels.includes('Senate') && c['Senate District']) parts.push(c['Senate District']);
+            if (levels.includes('Congressional') && c['Congressional District']) parts.push(c['Congressional District']);
+            return parts.join(' | ');
+        }
 
         // Populate filter dropdowns
         function populateFilters() {
@@ -1007,12 +1039,17 @@
                 }
             });
             const roles = [...allRoles].sort();
+            const politicalRoles = [...new Set(directoryData.flatMap(d => splitList(d['Political Role'])))].sort();
+            const results = [...new Set(directoryData.map(resultOutcome).filter(Boolean))].sort();
+            if (directoryData.some(d => (d['2026 General Result'] || '').toLowerCase().startsWith('not on'))) {
+                results.push('Not on ballot');
+            }
             
             // Split combined districts from ALL district columns
             const allDistricts = new Set();
             directoryData.forEach(d => {
                 // Check District, Congressional District, House District, Senate District
-                ['District', 'Congressional District', 'House District', 'Senate District'].forEach(field => {
+                ['Congressional District', 'House District', 'Senate District'].forEach(field => {
                     if (d[field]) {
                         d[field].split(',').forEach(district => {
                             const trimmed = district.trim();
@@ -1036,6 +1073,18 @@
             roleFilter.innerHTML = '<option value="">All Roles</option>';
             districtFilter.innerHTML = '<option value="">All Districts</option>';
             countyFilter.innerHTML = '<option value="">All Counties</option>';
+            document.getElementById('politicalRoleFilter').innerHTML = '<option value="">All Political Roles</option>';
+            document.getElementById('resultFilter').innerHTML = '<option value="">All 2026 Results</option>';
+
+            [['politicalRoleFilter', politicalRoles], ['resultFilter', results]].forEach(([id, list]) => {
+                const sel = document.getElementById(id);
+                list.forEach(v => {
+                    const option = document.createElement('option');
+                    option.value = v;
+                    option.textContent = v;
+                    sel.appendChild(option);
+                });
+            });
 
             roles.forEach(role => {
                 const option = document.createElement('option');
@@ -1082,26 +1131,35 @@
             const hasInstagram = contact.Instagram && contact.Instagram !== '?' && contact.Instagram !== '';
             const hasOtherSocial1 = !!otherSocial1Url;
             const hasOtherSocial2 = !!otherSocial2Url;
+            const tiktokUrl = tiktokLink(contact.Tiktok);
 
-            // Determine which district they're running for based on Title
-            let runningForDistrict = '';
-            const title = (contact.Title || '').toLowerCase();
-
-            if (title.includes('house')) {
-                runningForDistrict = contact['House District'] || contact.District || '';
-            } else if (title.includes('senate')) {
-                runningForDistrict = contact['Senate District'] || contact.District || '';
-            } else if (title.includes('congress')) {
-                runningForDistrict = contact['Congressional District'] || contact.District || '';
-            } else {
-                runningForDistrict = contact.District || '';
-            }
+            // District(s) the person ran for (from Candidate Level)
+            const runningForDistrict = getRunDistrict(contact);
+            const outcome = resultOutcome(contact);
+            const status = contact['Candidate Status'] || '';
+            const isElected = status === 'Elected official' || outcome === 'Won';
 
             // Collect all district info for display
             const districtInfo = [];
             if (contact['House District']) districtInfo.push(contact['House District']);
             if (contact['Senate District']) districtInfo.push(contact['Senate District']);
             if (contact['Congressional District']) districtInfo.push(contact['Congressional District']);
+
+            // Badge: 2026 outcome when known, otherwise elected status
+            let badgeHtml = '';
+            const where = runningForDistrict || contact['Candidate Level'] || '';
+            if (outcome === 'Won') {
+                badgeHtml = `<span class="badge">Won${where ? ': ' + esc(where) : ''}${contact['2026 Seat Flipped'] ? ' (' + esc(contact['2026 Seat Flipped']) + ')' : ''}</span>`;
+            } else if (outcome === 'Lost') {
+                badgeHtml = `<span class="badge" style="background:#e2e8f0;color:#475569;">Lost${where ? ': ' + esc(where) : ''}</span>`;
+            } else if (isElected) {
+                badgeHtml = `<span class="badge">Elected${where ? ': ' + esc(where) : ''}</span>`;
+            }
+
+            const groups = splitList(contact['Group Affiliation']);
+            const resultLine = contact['2026 General Result']
+                ? [contact['2026 General Result'], contact['2026 Percent'], contact['2026 Votes'] ? contact['2026 Votes'] + ' votes' : ''].filter(Boolean).join(' · ')
+                : '';
 
             // Build photo/avatar HTML
             // Check Photo URL, Photo, or the first column (portrait link) as fallback
@@ -1125,29 +1183,38 @@
                     </div>
                     <div class="contact-header">
                         <div class="contact-header-text">
-                            <div class="contact-name">${firstName} ${lastName}</div>
-                            ${contact.Role ? `<div class="contact-role">${contact.Role}</div>` : ''}
-                            ${contact.Title ? `<div class="contact-title">${contact.Title}</div>` : ''}
-                            ${runningForDistrict && (contact.Role || '').toLowerCase().includes('won race') ? `<span class="badge">Won: ${runningForDistrict}</span>` : (runningForDistrict && (contact.Role || '').toLowerCase().includes('candidate') && !(contact.Role || '').toLowerCase().includes('former candidate') ? `<span class="badge">Running for: ${runningForDistrict}</span>` : '')}
+                            <div class="contact-name">${esc(firstName)} ${esc(lastName)}</div>
+                            ${contact.Role ? `<div class="contact-role">${esc(contact.Role)}</div>` : ''}
+                            ${contact['Political Role'] ? `<div class="contact-title">${esc(contact['Political Role'])}</div>` : ''}
+                            ${contact.Title ? `<div class="contact-title">${esc(contact.Title)}</div>` : ''}
+                            ${badgeHtml}
                         </div>
                     </div>
                     
                     <div class="contact-info">
-                        ${(contact.Role || '').toLowerCase().includes('former candidate') && runningForDistrict ? `<div class="info-row"><span class="info-label">Ran for:</span><span class="info-value">${runningForDistrict}</span></div>` : ''}
+                        ${groups.length ? `<div class="info-row"><span class="info-label">Group:</span><span class="info-value">${esc(groups.join(', '))}</span></div>` : ''}
+                        ${contact['Candidate Level'] ? `<div class="info-row"><span class="info-label">Ran for:</span><span class="info-value">${esc(contact['Candidate Level'])}${contact['Year Ran'] ? ' (' + esc(contact['Year Ran']) + ')' : ''}</span></div>` : ''}
+                        ${contact['Local Office Ran For'] ? `<div class="info-row"><span class="info-label">Local office:</span><span class="info-value">${esc(contact['Local Office Ran For'])}</span></div>` : ''}
+                        ${resultLine ? `<div class="info-row"><span class="info-label">2026 result:</span><span class="info-value">${esc(resultLine)}</span></div>` : ''}
+                        ${contact['2026 Top Opponent'] ? `<div class="info-row"><span class="info-label">Top opponent:</span><span class="info-value">${esc(contact['2026 Top Opponent'])}</span></div>` : ''}
                         ${districtInfo.length > 0 ? `<div class="info-row"><span class="info-label">Districts:</span><span class="info-value">${districtInfo.join(' | ')}</span></div>` : ''}
                         ${contact.Counties ? `<div class="info-row"><span class="info-label">Counties:</span><span class="info-value">${contact.Counties}</span></div>` : ''}
                         ${contact['Elected Opponent'] ? `<div class="info-row"><span class="info-label">Opponent:</span><span class="info-value">${contact['Elected Opponent']}</span></div>` : ''}
                         ${contact['Primary Opponent'] ? `<div class="info-row"><span class="info-label">Primary Opponent:</span><span class="info-value">${contact['Primary Opponent']}</span></div>` : ''}
                         ${contact['Home City'] ? `<div class="info-row"><span class="info-label">Location:</span><span class="info-value">${contact['Home City']}${contact['Home County'] ? ', ' + contact['Home County'] : ''}</span></div>` : ''}
                         ${contact.Occupation ? `<div class="info-row"><span class="info-label">Occupation:</span><span class="info-value">${contact.Occupation}</span></div>` : ''}
-                        ${contact.Email ? `<div class="info-row"><span class="info-label">Email:</span><span class="info-value"><a href="mailto:${contact.Email}">${contact.Email}</a></span></div>` : ''}
-                        ${contact.Phone ? `<div class="info-row"><span class="info-label">Phone:</span><span class="info-value"><a href="tel:${contact.Phone}">${formatPhone(contact.Phone)}</a></span></div>` : ''}
+                        ${contact.Email ? `<div class="info-row"><span class="info-label">Email:</span><span class="info-value"><a href="mailto:${esc(contact.Email)}">${esc(contact.Email)}</a></span></div>` : ''}
+                        ${contact.Email2 ? `<div class="info-row"><span class="info-label">Email 2:</span><span class="info-value"><a href="mailto:${esc(contact.Email2)}">${esc(contact.Email2)}</a></span></div>` : ''}
+                        ${contact.Phone ? `<div class="info-row"><span class="info-label">Phone:</span><span class="info-value"><a href="tel:${esc(contact.Phone)}">${esc(formatPhone(contact.Phone))}</a></span></div>` : ''}
+                        ${contact['Previous Runs'] ? `<div class="info-row"><span class="info-label">Previous runs:</span><span class="info-value">${esc(contact['Previous Runs'])}</span></div>` : ''}
+                        ${contact.Notes ? `<div class="info-row"><span class="info-label">Notes:</span><span class="info-value">${esc(contact.Notes)}</span></div>` : ''}
                     </div>
                     
                     <div class="social-links">
                         ${hasWebsite ? `<a href="${websiteUrl}" target="_blank" class="social-btn">🌐 Website</a>` : ''}
                         ${hasFacebook ? `<a href="${facebookUrl}" target="_blank" class="social-btn">📘 Facebook</a>` : ''}
                         ${hasInstagram ? `<a href="https://instagram.com/${contact.Instagram.replace('@', '')}" target="_blank" class="social-btn">📸 Instagram</a>` : ''}
+                        ${tiktokUrl ? `<a href="${tiktokUrl}" target="_blank" class="social-btn">🎵 TikTok</a>` : ''}
                         ${hasOtherSocial1 ? `<a href="${otherSocial1Url}" target="_blank" class="social-btn">🔗 ${new URL(otherSocial1Url).hostname.replace('www.', '')}</a>` : ''}
                         ${hasOtherSocial2 ? `<a href="${otherSocial2Url}" target="_blank" class="social-btn">🔗 ${new URL(otherSocial2Url).hostname.replace('www.', '')}</a>` : ''}
                     </div>
@@ -1200,13 +1267,16 @@
             const roleFilter = document.getElementById('roleFilter').value;
             const districtFilter = document.getElementById('districtFilter').value;
             const countyFilter = document.getElementById('countyFilter').value;
+            const politicalRoleFilter = document.getElementById('politicalRoleFilter').value;
+            const resultFilter = document.getElementById('resultFilter').value;
 
             filteredData = directoryData.filter(contact => {
                 // Search filter - now includes Elected Opponent
                 const searchMatch = !searchTerm || 
-                    contact['First Name'].toLowerCase().includes(searchTerm) ||
-                    contact['Last Name'].toLowerCase().includes(searchTerm) ||
-                    (contact.Role && contact.Role.toLowerCase().includes(searchTerm)) ||
+                    [contact['First Name'], contact['Last Name'], contact.Role, contact['Political Role'],
+                     contact.Title, contact['Group Affiliation'], contact['Local Office Ran For'],
+                     contact['2026 Top Opponent'], contact['Candidate Level']]
+                        .some(v => v && v.toLowerCase().includes(searchTerm)) ||
                     (contact.Occupation && contact.Occupation.toLowerCase().includes(searchTerm)) ||
                     (contact['Home City'] && contact['Home City'].toLowerCase().includes(searchTerm)) ||
                     (contact.Counties && contact.Counties.toLowerCase().includes(searchTerm)) ||
@@ -1219,7 +1289,7 @@
 
                 // District filter - check if selected district is in ANY of the person's district fields
                 const districtMatch = !districtFilter || 
-                    ['District', 'Congressional District', 'House District', 'Senate District'].some(field => 
+                    ['Congressional District', 'House District', 'Senate District'].some(field => 
                         contact[field] && contact[field].split(',').map(d => d.trim()).includes(districtFilter)
                     );
 
@@ -1227,7 +1297,15 @@
                 const countyMatch = !countyFilter || 
                     (contact.Counties && contact.Counties.split(',').map(c => c.trim()).includes(countyFilter));
 
-                return searchMatch && roleMatch && districtMatch && countyMatch;
+                const politicalRoleMatch = !politicalRoleFilter ||
+                    splitList(contact['Political Role']).includes(politicalRoleFilter);
+
+                const resultMatch = !resultFilter ||
+                    (resultFilter === 'Not on ballot'
+                        ? (contact['2026 General Result'] || '').toLowerCase().startsWith('not on')
+                        : resultOutcome(contact) === resultFilter);
+
+                return searchMatch && roleMatch && districtMatch && countyMatch && politicalRoleMatch && resultMatch;
             });
 
             renderDirectory();
@@ -1239,6 +1317,8 @@
             document.getElementById('roleFilter').value = '';
             document.getElementById('districtFilter').value = '';
             document.getElementById('countyFilter').value = '';
+            document.getElementById('politicalRoleFilter').value = '';
+            document.getElementById('resultFilter').value = '';
             applyFilters();
         }
 
@@ -1260,7 +1340,6 @@
             
             // Collect all districts
             const districts = [];
-            if (contact.District) districts.push(contact.District);
             if (contact['Congressional District']) districts.push(contact['Congressional District']);
             if (contact['House District']) districts.push(contact['House District']);
             if (contact['Senate District']) districts.push(contact['Senate District']);
@@ -1276,12 +1355,13 @@
             const hasInstagram = contact.Instagram && contact.Instagram !== '?' && contact.Instagram !== '';
             const hasOtherSocial1 = !!otherSocial1Url;
             const hasOtherSocial2 = !!otherSocial2Url;
+            const tiktokUrl = tiktokLink(contact.Tiktok);
 
             return `
                 <div class="list-item">
                     <div>
-                        <div class="list-name">${firstName} ${lastName}</div>
-                        ${contact.Role ? `<div class="list-role">${contact.Role}</div>` : ''}
+                        <div class="list-name">${esc(firstName)} ${esc(lastName)}</div>
+                        ${contact.Role ? `<div class="list-role">${esc(contact.Role)}${resultOutcome(contact) ? ' · ' + resultOutcome(contact) + ' 2026' : ''}</div>` : ''}
                     </div>
                     <div class="list-location">
                         ${contact['Home City'] ? contact['Home City'] + (contact['Home County'] ? ', ' + contact['Home County'] : '') : '—'}
@@ -1298,6 +1378,7 @@
                         ${hasWebsite ? `<a href="${websiteUrl}" target="_blank" title="Website">🌐</a>` : ''}
                         ${hasFacebook ? `<a href="${facebookUrl}" target="_blank" title="Facebook">📘</a>` : ''}
                         ${hasInstagram ? `<a href="https://instagram.com/${contact.Instagram.replace('@', '')}" target="_blank" title="Instagram">📸</a>` : ''}
+                        ${tiktokUrl ? `<a href="${tiktokUrl}" target="_blank" title="TikTok">🎵</a>` : ''}
                         ${hasOtherSocial1 ? `<a href="${otherSocial1Url}" target="_blank" title="Other Social">🔗</a>` : ''}
                         ${hasOtherSocial2 ? `<a href="${otherSocial2Url}" target="_blank" title="Other Social">🔗</a>` : ''}
                     </div>
@@ -1310,6 +1391,8 @@
         document.getElementById('roleFilter').addEventListener('change', applyFilters);
         document.getElementById('districtFilter').addEventListener('change', applyFilters);
         document.getElementById('countyFilter').addEventListener('change', applyFilters);
+        document.getElementById('politicalRoleFilter').addEventListener('change', applyFilters);
+        document.getElementById('resultFilter').addEventListener('change', applyFilters);
         document.getElementById('resetBtn').addEventListener('click', resetFilters);
 
         // Fetch data from Google Sheets on page load
