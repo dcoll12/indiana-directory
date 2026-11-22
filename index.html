@@ -1034,6 +1034,8 @@
             return splitList(c['Political Role']).includes('Candidate (any level)') ||
                    ['Former candidate', 'Elected official'].includes(c['Candidate Status']);
         }
+        // Display wording for outcomes (data values stay 'Won'/'Lost')
+        const outcomeLabel = v => v === 'Lost' ? 'Did not win' : v;
         function resultOutcome(c) {
             const r = (c['2026 General Result'] || '').toLowerCase();
             if (r.startsWith('won')) return 'Won';
@@ -1105,7 +1107,7 @@
                 list.forEach(v => {
                     const option = document.createElement('option');
                     option.value = v;
-                    option.textContent = v.replace(/\s*\(any level\)/gi, '');
+                    option.textContent = outcomeLabel(v.replace(/\s*\(any level\)/gi, ''));
                     sel.appendChild(option);
                 });
             });
@@ -1185,7 +1187,7 @@
 
             const groups = splitList(contact['Group Affiliation']);
             const resultLine = contact['2026 General Result']
-                ? [contact['2026 General Result'], contact['2026 Percent']].filter(Boolean).join(' · ')
+                ? [contact['2026 General Result'].replace(/^lost/i, 'Did not win'), contact['2026 Percent']].filter(Boolean).join(' · ')
                 : '';
 
             // Build photo/avatar HTML
@@ -1389,7 +1391,7 @@
                 <div class="list-item">
                     <div>
                         <div class="list-name">${esc(firstName)} ${esc(lastName)}</div>
-                        ${contact.Role ? `<div class="list-role">${esc(contact.Role)}${resultOutcome(contact) ? ' · ' + resultOutcome(contact) + ' 2026' : ''}</div>` : ''}
+                        ${contact.Role ? `<div class="list-role">${esc(contact.Role)}${resultOutcome(contact) ? ' · ' + outcomeLabel(resultOutcome(contact)) + ' 2026' : ''}</div>` : ''}
                     </div>
                     <div class="list-location">
                         ${contact['Home City'] ? contact['Home City'] + (contact['Home County'] ? ', ' + contact['Home County'] : '') : '—'}
