@@ -1185,7 +1185,7 @@
 
             const groups = splitList(contact['Group Affiliation']);
             const resultLine = contact['2026 General Result']
-                ? [contact['2026 General Result'], contact['2026 Percent'], contact['2026 Votes'] ? contact['2026 Votes'] + ' votes' : ''].filter(Boolean).join(' · ')
+                ? [contact['2026 General Result'], contact['2026 Percent']].filter(Boolean).join(' · ')
                 : '';
 
             // Build photo/avatar HTML
@@ -1222,7 +1222,7 @@
                         ${groups.length ? `<div class="info-row"><span class="info-label">Group:</span><span class="info-value">${esc(groups.join(', '))}</span></div>` : ''}
                         ${contact['Candidate Level'] ? `<div class="info-row"><span class="info-label">Ran for:</span><span class="info-value">${esc(contact['Candidate Level'])}${contact['Year Ran'] ? ' (' + esc(contact['Year Ran']) + ')' : ''}</span></div>` : ''}
                         ${contact['Local Office Ran For'] ? `<div class="info-row"><span class="info-label">Local office:</span><span class="info-value">${esc(contact['Local Office Ran For'])}</span></div>` : ''}
-                        ${primary ? `<div class="info-row"><span class="info-label">2026 primary:</span><span class="info-value">${primary.advanced ? 'Advanced' : 'Did not advance'} · ${primary.pct}% · ${primary.votes.toLocaleString()} votes</span></div>` : ''}
+                        ${primary ? `<div class="info-row"><span class="info-label">2026 primary:</span><span class="info-value">${primary.advanced ? 'Advanced' : 'Did not advance'} · ${primary.pct}%</span></div>` : ''}
                         ${resultLine ? `<div class="info-row"><span class="info-label">2026 result:</span><span class="info-value">${esc(resultLine)}</span></div>` : ''}
                         ${contact['2026 Top Opponent'] ? `<div class="info-row"><span class="info-label">Top opponent:</span><span class="info-value">${esc(contact['2026 Top Opponent'])}</span></div>` : ''}
                         ${districtInfo.length > 0 ? `<div class="info-row"><span class="info-label">Districts:</span><span class="info-value">${districtInfo.join(' | ')}</span></div>` : ''}
