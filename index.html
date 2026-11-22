@@ -1151,7 +1151,7 @@
             if (outcome === 'Won') {
                 badgeHtml = `<span class="badge">Won${where ? ': ' + esc(where) : ''}${contact['2026 Seat Flipped'] ? ' (' + esc(contact['2026 Seat Flipped']) + ')' : ''}</span>`;
             } else if (outcome === 'Lost') {
-                badgeHtml = `<span class="badge" style="background:#e2e8f0;color:#475569;">Ran for 2026${where ? ': ' + esc(where) : ''}</span>`;
+                badgeHtml = `<span class="badge" style="background:#e2e8f0;color:#475569;">Ran for${contact['Year Ran'] ? ' ' + esc(contact['Year Ran']) : ''}${where ? ': ' + esc(where) : ''}</span>`;
             } else if (isElected) {
                 badgeHtml = `<span class="badge">Elected${where ? ': ' + esc(where) : ''}</span>`;
             }
