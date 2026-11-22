@@ -34,30 +34,30 @@ const DIRECTORY_SHEET_NAME = 'DIRECTORY';
  * Update these if your form question wording differs.
  */
 const FIELD_MAP = {
-  // Form question title                  : Directory column header
-  'First Name':                            'First Name',
-  'Last Name':                             'Last Name',
-  'Email':                                 'Email',
-  'Phone':                                 'Phone',
-  'Role':                                  'Role',
-  'Title (e.g., Senate Minority Leader)':  'Title',
-  'Type of Candidate':                     'Candidate Level',
-  'Counties Covered':                      'Counties',
-  'Home City':                             'Home City',
-  'Home County':                           'Home County',
-  'Occupation':                            'Occupation',
-  'Website URL':                           'Website',
-  'Facebook URL':                          'Facebook',
-  'Instagram Handle':                      'Instagram',
-  'House District':                        'House District',
-  'Senate District':                       'Senate District',
-  'Congressional District':                'Congressional District',
-  'Alternative email':                     'Email2',
-  'How would you describe your role?':     'Notes',
-  'If Statewide, which office?':           'Candidate Level',
-  'Year(s) ran/running?':                  'Year Ran',
+  // Form question title          : Directory column header
+  'First Name': 'First Name',
+  'Last Name': 'Last Name',
+  'Email': 'Email',
+  'Phone': 'Phone',
+  'Role': 'Role',
+  'Title (e.g., Senate Minority Leader)': 'Title',
+  'Type of Candidate': 'Candidate Level',
+  'Year(s) ran/running?': 'Year Ran',
+  'If Statewide, which office?': 'Statewide',
   'If Local, which office did you run for?': 'Local Office Ran For',
-  'Upload portrait':                       'Photo',
+  'Congressional District': 'Congressional District',
+  'House District': 'House District',
+  'Senate District': 'Senate District',
+  'Counties Covered': 'Counties',
+  'Home City': 'Home City',
+  'Home County': 'Home County',
+  'Occupation': 'Occupation',
+  'Website URL': 'Website',
+  'Facebook URL': 'Facebook',
+  'Instagram Handle': 'Instagram',
+  'Alternative email': 'Email2',
+  'How would you describe your role?': 'Political Role',
+  'Upload portrait': 'Photo',
 };
 
 /**
@@ -70,12 +70,15 @@ const FIELD_MAP = {
 const UPDATE_FIELD_MAP = {
   'First Name':                          'First Name',
   'Last Name':                           'Last Name',
-  'Type of Candidate':                   'Candidate Level',
+  'Type of Candidate': 'Candidate Level',
+  'Year(s) ran/running?': 'Year Ran',
+  'If Statewide, which office?': 'Statewide',
+  'If Local, which office did you run for?': 'Local Office Ran For',
   'Phone':                               'Phone',
   'Email':                               'Email',
   'Alternative email':                   'Email2',
-  'Role':                                'Role',
-  'How would you describe your role?':   'Notes',
+  'Role': 'Role',
+  'How would you describe your role?': 'Political Role',
   'Title (e.g., Senate Minority Leader)':'Title',
   'Congressional District':              'Congressional District',
   'House District':                      'House District',
@@ -88,9 +91,6 @@ const UPDATE_FIELD_MAP = {
   'Facebook URL':                        'Facebook',
   'Instagram Handle':                    'Instagram',
   'Upload portrait':                     'Photo',
-  'If Statewide, which office?':         'Candidate Level',
-  'Year(s) ran/running?':                'Year Ran',
-  'If Local, which office did you run for?': 'Local Office Ran For',
 };
 
 // Sheet names for the form response tabs.
@@ -133,18 +133,21 @@ function onFormSubmit(e) {
 
     // Build a new row aligned to the DIRECTORY column order
     const newRow = directoryHeaders.map(directoryCol => {
-      // Several form questions can feed one directory column (e.g. Type of
-      // Candidate and "If Statewide, which office?" both go to Candidate Level).
-      // Use the first non-empty answer.
-      const questions = Object.keys(FIELD_MAP).filter(q => FIELD_MAP[q] === directoryCol);
-      for (const q of questions) {
-        const answers = formValues[q];
-        if (answers && answers.length && answers[0].toString().trim()) {
-          return answers[0].trim(); // Google Forms wraps each answer in an array
-        }
-      }
-      return '';
+      // Find the form question that maps to this directory column
+      const formQuestion = Object.keys(FIELD_MAP).find(
+        q => FIELD_MAP[q] === directoryCol
+      );
+
+      if (!formQuestion) return ''; // No mapping defined for this column
+
+      const answers = formValues[formQuestion];
+      if (!answers || answers.length === 0) return '';
+
+      return answers[0].trim(); // Google Forms wraps each answer in an array
     });
+    // New submissions are flagged until someone reviews them
+    const statusIdx = directoryHeaders.indexOf('Candidate Status');
+    if (statusIdx > -1 && !newRow[statusIdx]) newRow[statusIdx] = 'Needs review';
 
     // Append the mapped row to the DIRECTORY sheet
     directorySheet.appendRow(newRow);
@@ -255,7 +258,16 @@ function onUpdateFormSubmit(e) {
         return;
       }
 
-      directorySheet.getRange(sheetRow, colIndex + 1).setValue(value);
+      // Year Ran accumulates: merge new years with existing ones, oldest first
+      let newValue = value;
+      if (dirCol === 'Year Ran') {
+        const rank = y => /^\d+$/.test(y) ? Number(y) : 0;
+        const merged = directorySheet.getRange(sheetRow, colIndex + 1).getValue().toString()
+          .split(',').concat(value.split(',')).map(y => y.trim()).filter(Boolean);
+        newValue = merged.filter((y, i) => merged.indexOf(y) === i)
+          .sort((a, b) => rank(a) - rank(b)).join(', ');
+      }
+      directorySheet.getRange(sheetRow, colIndex + 1).setValue(newValue);
     });
 
     console.log('onUpdateFormSubmit: updated "' + lookupFirst + ' ' + lookupLast + '" at row ' + sheetRow + '.');
