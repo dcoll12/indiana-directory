@@ -22,6 +22,12 @@
 
 // ── Configuration ────────────────────────────────────────────────────────────
 
+// Sheet ID:    1jJUkXqj4o4pAhQLoRVjwB0VGROsoD6jBKCTQafiCOHw
+// New form:    1VvzqOps4rVMfllmFSJ9qgug-NygUbmEJ-ffZBh8E-I8 (responses tab: "New Submission Request")
+// Update form: 17dU2Ppm39R489SMQFsxs8p84sNesxNVCZhDQr7UuSzw (responses tab: "Update Responses")
+// "How would you describe your role?" is a checkbox question on both forms, so it
+// feeds the Political Role column. Blank update answers are skipped and never erase data.
+
 const DIRECTORY_SHEET_NAME = 'DIRECTORY';
 
 /**
