@@ -1174,14 +1174,16 @@
 
             // Badge: 2026 outcome when known, otherwise elected status
             let badgeHtml = '';
-            const where = runningForDistrict || contact['Candidate Level'] || '';
+            const where = contact['Statewide Office'] || runningForDistrict || contact['Candidate Level'] || '';
+            const years = (contact['Year Ran'] || '').match(/\d{4}/g) || [];
+            const latestYear = years.length ? Math.max(...years.map(Number)) : '';
             const primary = contact._primary;
             if (primary && !primary.advanced && outcome !== 'Won') {
                 badgeHtml = `<span class="badge" style="background:#e2e8f0;color:#475569;">Ran for 2026: ${esc(primary.office)} (primary)</span>`;
             } else if (outcome === 'Won') {
                 badgeHtml = `<span class="badge">Won${where ? ': ' + esc(where) : ''}${contact['2026 Seat Flipped'] ? ' (' + esc(contact['2026 Seat Flipped']) + ')' : ''}</span>`;
             } else if (outcome === 'Lost' || status === 'Former candidate') {
-                badgeHtml = `<span class="badge" style="background:#e2e8f0;color:#475569;">Ran for${contact['Year Ran'] ? ' ' + esc(contact['Year Ran']) : ''}${where ? ': ' + esc(where) : ''}</span>`;
+                badgeHtml = `<span class="badge" style="background:#e2e8f0;color:#475569;">Ran for${latestYear ? ' ' + latestYear : ''}${where ? ': ' + esc(where) : ''}</span>`;
             } else if (isElected) {
                 badgeHtml = `<span class="badge">Elected${where ? ': ' + esc(where) : ''}</span>`;
             }
@@ -1224,6 +1226,7 @@
                     <div class="contact-info">
                         ${groups.length ? `<div class="info-row"><span class="info-label">Group:</span><span class="info-value">${esc(groups.join(', '))}</span></div>` : ''}
                         ${contact['Candidate Level'] ? `<div class="info-row"><span class="info-label">Ran for:</span><span class="info-value">${esc(contact['Candidate Level'])}${contact['Year Ran'] ? ' (' + esc(contact['Year Ran']) + ')' : ''}</span></div>` : ''}
+                        ${contact['Statewide Office'] ? `<div class="info-row"><span class="info-label">Statewide office:</span><span class="info-value">${esc(contact['Statewide Office'])}</span></div>` : ''}
                         ${contact['Local Office Ran For'] ? `<div class="info-row"><span class="info-label">Local office:</span><span class="info-value">${esc(contact['Local Office Ran For'])}</span></div>` : ''}
                         ${primary ? `<div class="info-row"><span class="info-label">2026 primary:</span><span class="info-value">${primary.advanced ? 'Advanced' : 'Did not advance'} · ${primary.pct}%</span></div>` : ''}
                         ${resultLine ? `<div class="info-row"><span class="info-label">2026 result:</span><span class="info-value">${esc(resultLine)}</span></div>` : ''}
