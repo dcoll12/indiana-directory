@@ -1081,7 +1081,7 @@
                 list.forEach(v => {
                     const option = document.createElement('option');
                     option.value = v;
-                    option.textContent = v;
+                    option.textContent = v.replace(/\s*\(any level\)/gi, '');
                     sel.appendChild(option);
                 });
             });
@@ -1151,7 +1151,7 @@
             if (outcome === 'Won') {
                 badgeHtml = `<span class="badge">Won${where ? ': ' + esc(where) : ''}${contact['2026 Seat Flipped'] ? ' (' + esc(contact['2026 Seat Flipped']) + ')' : ''}</span>`;
             } else if (outcome === 'Lost') {
-                badgeHtml = `<span class="badge" style="background:#e2e8f0;color:#475569;">Ran for${where ? ': ' + esc(where) : ''}</span>`;
+                badgeHtml = `<span class="badge" style="background:#e2e8f0;color:#475569;">Ran for${contact['Year Ran'] ? ' ' + esc(contact['Year Ran']) : ''}${where ? ': ' + esc(where) : ''}</span>`;
             } else if (isElected) {
                 badgeHtml = `<span class="badge">Elected${where ? ': ' + esc(where) : ''}</span>`;
             }
@@ -1185,7 +1185,7 @@
                         <div class="contact-header-text">
                             <div class="contact-name">${esc(firstName)} ${esc(lastName)}</div>
                             ${contact.Role ? `<div class="contact-role">${esc(contact.Role)}</div>` : ''}
-                            ${contact['Political Role'] ? `<div class="contact-title">${esc(contact['Political Role'])}</div>` : ''}
+                            ${contact['Political Role'] ? `<div class="contact-title">${esc(contact['Political Role'].replace(/\s*\(any level\)/gi, ''))}</div>` : ''}
                             ${contact.Title ? `<div class="contact-title">${esc(contact.Title)}</div>` : ''}
                             ${badgeHtml}
                         </div>
