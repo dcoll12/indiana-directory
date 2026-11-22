@@ -22,6 +22,12 @@
 
 // ── Configuration ────────────────────────────────────────────────────────────
 
+// Sheet ID:    1jJUkXqj4o4pAhQLoRVjwB0VGROsoD6jBKCTQafiCOHw
+// New form:    1VvzqOps4rVMfllmFSJ9qgug-NygUbmEJ-ffZBh8E-I8 (responses tab: "New Submission Request")
+// Update form: 17dU2Ppm39R489SMQFsxs8p84sNesxNVCZhDQr7UuSzw (responses tab: "Update Responses")
+// "How would you describe your role?" is a checkbox question on both forms, so it
+// feeds the Political Role column. Blank update answers are skipped and never erase data.
+
 const DIRECTORY_SHEET_NAME = 'DIRECTORY';
 
 /**
@@ -35,27 +41,29 @@ const DIRECTORY_SHEET_NAME = 'DIRECTORY';
  */
 const FIELD_MAP = {
   // Form question title          : Directory column header
-  'First Name':                    'First Name',
-  'Last Name':                     'Last Name',
-  'Email':                         'Email',
-  'Phone':                         'Phone',
-  'Role':                          'Role',
-  'Title':                         'Title',
-  'District':                      'District',
-  'Congressional District':        'Congressional District',
-  'House District':                'House District',
-  'Senate District':               'Senate District',
-  'Counties':                      'Counties',
-  'Home City':                     'Home City',
-  'Home County':                   'Home County',
-  'Occupation':                    'Occupation',
-  'Website':                       'Website',
-  'Facebook URL':                  'Facebook',
-  'Instagram Handle':              'Instagram',
-  'Other Social 1':                'Other Social 1',
-  'Other Social 2':                'Other Social 2',
-  'Elected Opponent':              'Elected Opponent',
-  'Primary Opponent':              'Primary Opponent',
+  'First Name': 'First Name',
+  'Last Name': 'Last Name',
+  'Email': 'Email',
+  'Phone': 'Phone',
+  'Role': 'Role',
+  'Title (e.g., Senate Minority Leader)': 'Title',
+  'Type of Candidate': 'Candidate Level',
+  'Year(s) ran/running?': 'Year Ran',
+  'If Statewide, which office?': 'Statewide',
+  'If Local, which office did you run for?': 'Local Office Ran For',
+  'Congressional District': 'Congressional District',
+  'House District': 'House District',
+  'Senate District': 'Senate District',
+  'Counties Covered': 'Counties',
+  'Home City': 'Home City',
+  'Home County': 'Home County',
+  'Occupation': 'Occupation',
+  'Website URL': 'Website',
+  'Facebook URL': 'Facebook',
+  'Instagram Handle': 'Instagram',
+  'Alternative email': 'Email2',
+  'How would you describe your role?': 'Political Role',
+  'Upload portrait': 'Photo',
 };
 
 /**
@@ -68,12 +76,15 @@ const FIELD_MAP = {
 const UPDATE_FIELD_MAP = {
   'First Name':                          'First Name',
   'Last Name':                           'Last Name',
-  'Type of Candidate':                   'Filed (candidate)',
+  'Type of Candidate': 'Candidate Level',
+  'Year(s) ran/running?': 'Year Ran',
+  'If Statewide, which office?': 'Statewide',
+  'If Local, which office did you run for?': 'Local Office Ran For',
   'Phone':                               'Phone',
   'Email':                               'Email',
   'Alternative email':                   'Email2',
-  'Role':                                'Role',
-  'How would you describe your role?':   'Notes',
+  'Role': 'Role',
+  'How would you describe your role?': 'Political Role',
   'Title (e.g., Senate Minority Leader)':'Title',
   'Congressional District':              'Congressional District',
   'House District':                      'House District',
@@ -90,7 +101,7 @@ const UPDATE_FIELD_MAP = {
 
 // Sheet names for the form response tabs.
 // Adjust these to match the actual tab names in your spreadsheet.
-const NEW_RESPONSES_SHEET_NAME  = 'Form Responses 1';
+const NEW_RESPONSES_SHEET_NAME  = 'New Submission Request';
 const UPDATE_RESPONSES_SHEET_NAME = 'Update Responses';
 
 // ── Main trigger function (new submissions) ──────────────────────────────────
@@ -140,6 +151,9 @@ function onFormSubmit(e) {
 
       return answers[0].trim(); // Google Forms wraps each answer in an array
     });
+    // New submissions are flagged until someone reviews them
+    const statusIdx = directoryHeaders.indexOf('Candidate Status');
+    if (statusIdx > -1 && !newRow[statusIdx]) newRow[statusIdx] = 'Needs review';
 
     // Append the mapped row to the DIRECTORY sheet
     directorySheet.appendRow(newRow);
@@ -250,7 +264,16 @@ function onUpdateFormSubmit(e) {
         return;
       }
 
-      directorySheet.getRange(sheetRow, colIndex + 1).setValue(value);
+      // Year Ran accumulates: merge new years with existing ones, oldest first
+      let newValue = value;
+      if (dirCol === 'Year Ran') {
+        const rank = y => /^\d+$/.test(y) ? Number(y) : 0;
+        const merged = directorySheet.getRange(sheetRow, colIndex + 1).getValue().toString()
+          .split(',').concat(value.split(',')).map(y => y.trim()).filter(Boolean);
+        newValue = merged.filter((y, i) => merged.indexOf(y) === i)
+          .sort((a, b) => rank(a) - rank(b)).join(', ');
+      }
+      directorySheet.getRange(sheetRow, colIndex + 1).setValue(newValue);
     });
 
     console.log('onUpdateFormSubmit: updated "' + lookupFirst + ' ' + lookupLast + '" at row ' + sheetRow + '.');
