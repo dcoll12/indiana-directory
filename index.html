@@ -1050,7 +1050,7 @@
             if (levels.includes('House') && c['House District']) parts.push(c['House District']);
             if (levels.includes('Senate') && c['Senate District']) parts.push(c['Senate District']);
             if (levels.includes('Congressional') && c['Congressional District']) parts.push(c['Congressional District']);
-            if (c['Statewide'] && (levels.includes('Statewide') || !parts.length)) parts.push(c['Statewide']);
+            if (c['Statewide Office'] && (levels.includes('Statewide') || !parts.length)) parts.push(c['Statewide Office']);
             return parts.join(' | ');
         }
 
